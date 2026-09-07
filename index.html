@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FINAN · Aprende a manejar tu dinero jugando</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --verde:#10B981; --verde-dark:#059669; --verde-soft:#D1FAE5;
+  --sol:#F59E0B; --sol-dark:#D97706; --sol-soft:#FEF3C7;
+  --tinta:#1E293B; --gris:#64748B; --gris-soft:#94A3B8;
+  --nube:#F1F5F9; --nube-2:#F8FAFC; --blanco:#FFFFFF;
+  --coral:#EF4444; --coral-soft:#FEE2E2;
+  --violeta:#8B5CF6; --violeta-soft:#EDE9FE;
+  --azul:#3B82F6; --azul-soft:#DBEAFE;
+  --linea:#E2E8F0;
+  --sombra:0 4px 14px rgba(15,23,42,.08);
+  --sombra-fuerte:0 10px 30px rgba(15,23,42,.16);
+  --r:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #E9FBF3 0%, transparent 55%),
+    radial-gradient(1000px 700px at 110% 10%, #FFF6E6 0%, transparent 50%),
+    #EAF0F6;
+  color:var(--tinta);
+  display:flex;align-items:center;justify-content:center;
+  min-height:100dvh;padding:20px;
+  overscroll-behavior:none;
+}
+/* ---------- Marco de teléfono (solo escritorio) ---------- */
+.phone{
+  width:400px;height:840px;max-height:calc(100dvh - 40px);
+  background:var(--blanco);
+  border-radius:44px;
+  box-shadow:var(--sombra-fuerte), 0 0 0 12px #0f172a, 0 0 0 14px #1e293b;
+  position:relative;overflow:hidden;display:flex;flex-direction:column;
+}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:150px;height:26px;background:#0f172a;border-radius:0 0 18px 18px;z-index:60}
+@media (max-width:440px){
+  body{padding:0}
+  .phone{width:100vw;height:100dvh;max-height:100dvh;border-radius:0;box-shadow:none}
+  .notch{display:none}
+}
+/* ---------- Barra superior (gamificación) ---------- */
+.topbar{
+  flex:0 0 auto;display:flex;align-items:center;gap:8px;
+  padding:34px 16px 12px;background:var(--blanco);
+  border-bottom:1px solid var(--linea);z-index:20;
+}
+.topbar.hidden{display:none}
+.stat{display:flex;align-items:center;gap:5px;font-weight:800;font-size:15px}
+.stat .ico{font-size:18px;line-height:1}
+.stat.vidas{color:var(--coral)} .stat.sol{color:var(--sol-dark)}
+.stat.xp{color:var(--violeta)} .stat.racha{color:var(--sol-dark)}
+.topbar .spacer{flex:1}
+.pill{background:var(--nube);border-radius:999px;padding:5px 11px}
+/* ---------- Zona de contenido ---------- */
+.screens{flex:1 1 auto;position:relative;overflow:hidden}
+.screen{
+  position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
+  padding:20px 18px 24px;display:none;
+  -webkit-overflow-scrolling:touch;
+}
+.screen.active{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.8);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+/* ---------- Navegación inferior ---------- */
+.navbar{
+  flex:0 0 auto;display:flex;background:var(--blanco);
+  border-top:1px solid var(--linea);padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+}
+.navbar.hidden{display:none}
+.navbtn{flex:1;background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:6px 0;border-radius:14px;color:var(--gris-soft);font-family:inherit;
+  font-weight:800;font-size:10.5px;transition:.2s}
+.navbtn .ico{font-size:22px;line-height:1}
+.navbtn.on{color:var(--verde-dark)}
+.navbtn.on .ico{transform:translateY(-1px)}
+/* ---------- Tipografía utilitaria ---------- */
+h1{font-size:26px;font-weight:900;letter-spacing:-.5px;line-height:1.15}
+h2{font-size:21px;font-weight:900;letter-spacing:-.3px;line-height:1.2}
+h3{font-size:16px;font-weight:800}
+.muted{color:var(--gris)} .small{font-size:13px}
+.center{text-align:center}
+.soles{font-variant-numeric:tabular-nums}
+/* ---------- Botones ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;border:none;cursor:pointer;font-family:inherit;
+  font-weight:900;font-size:16px;color:var(--blanco);
+  background:var(--verde);border-radius:16px;padding:15px 18px;
+  box-shadow:0 4px 0 var(--verde-dark);transition:transform .06s,box-shadow .06s;
+  letter-spacing:.2px;
+}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--verde-dark)}
+.btn.sol{background:var(--sol);box-shadow:0 4px 0 var(--sol-dark)}
+.btn.sol:active{box-shadow:0 1px 0 var(--sol-dark)}
+.btn.ghost{background:var(--blanco);color:var(--tinta);
+  box-shadow:0 0 0 2px var(--linea) inset;border-radius:16px}
+.btn.ghost:active{transform:translateY(2px)}
+.btn.dark{background:var(--tinta);box-shadow:0 4px 0 #0f172a}
+.btn:disabled{opacity:.45;box-shadow:none;cursor:default;transform:none}
+.btn.sm{width:auto;padding:11px 18px;font-size:14px;border-radius:13px}
+/* ---------- Tarjetas ---------- */
+.card{background:var(--blanco);border:1px solid var(--linea);
+  border-radius:var(--r);padding:18px;box-shadow:var(--sombra)}
+.card+.card{margin-top:14px}
+.tag{display:inline-block;font-size:11px;font-weight:900;padding:4px 10px;
+  border-radius:999px;letter-spacing:.4px;text-transform:uppercase}
+.tag.verde{background:var(--verde-soft);color:var(--verde-dark)}
+.tag.sol{background:var(--sol-soft);color:var(--sol-dark)}
+.tag.violeta{background:var(--violeta-soft);color:#6D28D9}
+/* ---------- Opciones (quiz / decisiones) ---------- */
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:var(--blanco);border:2px solid var(--linea);border-radius:16px;
+  padding:15px 16px;cursor:pointer;font-family:inherit;font-weight:700;
+  font-size:14.5px;color:var(--tinta);transition:.12s;margin-bottom:11px;line-height:1.35}
+.opt:active{transform:scale(.99)}
+.opt .lead{flex:0 0 auto;width:30px;height:30px;border-radius:9px;
+  background:var(--nube);display:grid;place-items:center;font-weight:900;font-size:15px}
+.opt.correct{border-color:var(--verde);background:var(--verde-soft)}
+.opt.correct .lead{background:var(--verde);color:#fff}
+.opt.wrong{border-color:var(--coral);background:var(--coral-soft)}
+.opt.wrong .lead{background:var(--coral);color:#fff}
+.opt.dim{opacity:.5}
+.opt:disabled{cursor:default}
+/* ---------- Barra de progreso ---------- */
+.prog{height:14px;background:var(--nube);border-radius:999px;overflow:hidden}
+.prog>i{display:block;height:100%;background:var(--verde);border-radius:999px;
+  transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.prog.sol>i{background:var(--sol)}
+.prog.violeta>i{background:var(--violeta)}
+/* ---------- Feedback inferior (correcto/incorrecto) ---------- */
+.feedback{position:absolute;left:0;right:0;bottom:0;padding:18px;
+  border-radius:24px 24px 0 0;animation:slideUp .3s ease;z-index:40}
+.feedback.ok{background:var(--verde-soft);border-top:2px solid var(--verde)}
+.feedback.no{background:var(--coral-soft);border-top:2px solid var(--coral)}
+.feedback h3{font-size:17px}
+.feedback .ok-t{color:var(--verde-dark)} .feedback .no-t{color:var(--coral)}
+/* ---------- Chips de dinero (arrastrar visual) ---------- */
+.money-row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.chip{background:var(--sol-soft);color:var(--sol-dark);font-weight:900;
+  padding:9px 13px;border-radius:12px;font-size:14px;border:2px solid transparent;
+  cursor:pointer;transition:.12s}
+.chip.sel{border-color:var(--sol);background:var(--sol);color:#fff}
+.chip.gone{opacity:.3;text-decoration:line-through}
+/* ---------- Nodos del mapa ---------- */
+.map-path{position:relative;padding:6px 0 20px}
+.node{position:relative;display:flex;align-items:center;gap:14px;margin:0 auto;
+  width:max-content;padding:6px 0}
+.node .dot{width:66px;height:66px;border-radius:22px;display:grid;place-items:center;
+  font-size:30px;box-shadow:var(--sombra);position:relative;flex:0 0 auto;cursor:pointer;
+  transition:transform .12s}
+.node .dot:active{transform:scale(.94)}
+.node.done .dot{background:var(--verde);color:#fff;box-shadow:0 6px 0 var(--verde-dark)}
+.node.current .dot{background:var(--sol);color:#fff;box-shadow:0 6px 0 var(--sol-dark);
+  animation:bob 2s ease-in-out infinite}
+.node.locked .dot{background:var(--nube);color:var(--gris-soft);cursor:not-allowed}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.node .lbl{font-weight:800;font-size:13.5px;max-width:150px;line-height:1.25}
+.node.locked .lbl{color:var(--gris-soft)}
+.node .lvl-num{font-size:11px;font-weight:900;color:var(--gris-soft);text-transform:uppercase;letter-spacing:.5px}
+.connector{width:5px;height:26px;background:var(--linea);margin:0 auto;border-radius:3px}
+.connector.done{background:var(--verde)}
+.node.zig{margin-left:34px} .node.zag{margin-right:34px;flex-direction:row-reverse;text-align:right}
+/* ---------- Insignias ---------- */
+.badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.badge{text-align:center;padding:14px 6px;border-radius:16px;background:var(--nube-2);
+  border:1px solid var(--linea)}
+.badge .b-ico{font-size:32px;filter:grayscale(1);opacity:.35}
+.badge.got{background:var(--sol-soft);border-color:var(--sol)}
+.badge.got .b-ico{filter:none;opacity:1}
+.badge .b-name{font-size:10.5px;font-weight:800;margin-top:5px;line-height:1.2}
+/* ---------- Salud financiera ---------- */
+.dim-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.dim-row .d-name{flex:0 0 118px;font-size:12.5px;font-weight:800}
+.dim-row .prog{flex:1}
+.dim-row .d-val{flex:0 0 34px;text-align:right;font-weight:900;font-size:12.5px}
+.gauge{width:150px;height:150px;margin:0 auto;position:relative}
+.gauge svg{transform:rotate(-90deg)}
+.gauge .g-num{position:absolute;inset:0;display:grid;place-items:center;flex-direction:column}
+.gauge .g-num b{font-size:40px;font-weight:900;line-height:1}
+/* ---------- Chat FINAN ---------- */
+.chat{display:flex;flex-direction:column;gap:10px;padding-bottom:8px}
+.msg{max-width:82%;padding:12px 14px;border-radius:18px;font-size:14px;
+  font-weight:600;line-height:1.4;animation:pop .25s ease}
+.msg.bot{background:var(--nube);border-bottom-left-radius:5px;align-self:flex-start}
+.msg.me{background:var(--verde);color:#fff;border-bottom-right-radius:5px;align-self:flex-end}
+.suggest{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.suggest button{background:var(--verde-soft);color:var(--verde-dark);border:none;
+  font-family:inherit;font-weight:800;font-size:12.5px;padding:9px 13px;border-radius:999px;cursor:pointer}
+/* ---------- Simuladores ---------- */
+.slider-row{margin:16px 0}
+.slider-row label{display:flex;justify-content:space-between;font-weight:800;font-size:13.5px;margin-bottom:8px}
+.slider-row label b{color:var(--verde-dark);font-size:15px}
+input[type=range]{-webkit-appearance:none;width:100%;height:8px;border-radius:999px;
+  background:var(--nube);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;
+  border-radius:50%;background:var(--verde);cursor:pointer;box-shadow:var(--sombra);border:3px solid #fff}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:var(--verde);
+  cursor:pointer;border:3px solid #fff}
+.result-box{background:var(--tinta);color:#fff;border-radius:16px;padding:16px;margin-top:8px}
+.result-box .rb-row{display:flex;justify-content:space-between;padding:5px 0;font-weight:700;font-size:14px}
+.result-box .rb-row b{font-variant-numeric:tabular-nums}
+.result-box .big{font-size:22px;font-weight:900}
+.donut{width:158px;height:158px;margin:6px auto 4px}
+.donut canvas{width:100%;height:100%;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;margin-top:10px}
+.legend span{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.credit-card{border:2px solid var(--linea);border-radius:16px;padding:14px;cursor:pointer;transition:.15s}
+.credit-card.pick{border-color:var(--verde);background:var(--verde-soft)}
+.credit-card h3{font-size:14px;margin-bottom:8px}
+.credit-card .cc-row{display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;padding:3px 0}
+/* ---------- Toast ---------- */
+.toast{position:absolute;left:50%;top:70px;transform:translateX(-50%) translateY(-20px);
+  background:var(--tinta);color:#fff;font-weight:800;font-size:13.5px;padding:11px 18px;
+  border-radius:999px;box-shadow:var(--sombra-fuerte);opacity:0;pointer-events:none;
+  transition:.3s;z-index:80;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ---------- Reward overlay ---------- */
+.overlay{position:absolute;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);
+  display:none;place-items:center;z-index:70;padding:24px}
+.overlay.show{display:grid;animation:fade .3s}
+.reward{background:#fff;border-radius:28px;padding:30px 24px;text-align:center;width:100%;
+  animation:pop .4s ease}
+.reward .r-emoji{font-size:64px;animation:bob 1.6s ease-in-out infinite}
+.reward .r-rewards{display:flex;justify-content:center;gap:14px;margin:18px 0}
+.reward .r-chip{background:var(--nube);border-radius:14px;padding:10px 16px;font-weight:900}
+.reward .r-chip .v{font-size:20px}
+/* ---------- Misc ---------- */
+.spacer-s{height:12px}.spacer-m{height:20px}.spacer-l{height:32px}
+.scene{background:linear-gradient(135deg,var(--verde-soft),var(--sol-soft));
+  border-radius:20px;padding:22px;text-align:center;margin-bottom:16px}
+.scene .avatar{font-size:56px;margin-bottom:6px}
+.scene .bubble{background:#fff;border-radius:16px;padding:14px;font-weight:700;
+  font-size:15px;box-shadow:var(--sombra);position:relative;line-height:1.4}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi .k{background:var(--nube-2);border:1px solid var(--linea);border-radius:14px;padding:12px;text-align:center}
+.kpi .k b{font-size:22px;font-weight:900;display:block;color:var(--verde-dark)}
+.kpi .k span{font-size:11px;font-weight:700;color:var(--gris)}
+.lesson-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.lesson-head .x{font-size:24px;color:var(--gris-soft);background:none;border:none;cursor:pointer;font-weight:900}
+.lesson-head .prog{flex:1}
+ul.clean{list-style:none} ul.clean li{padding:7px 0 7px 26px;position:relative;font-weight:600;font-size:14px;line-height:1.4}
+ul.clean li:before{content:"✓";position:absolute;left:0;color:var(--verde);font-weight:900}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+
+  <!-- Barra superior -->
+  <div class="topbar hidden" id="topbar">
+    <div class="stat racha pill"><span class="ico">🔥</span><span id="t-racha">0</span></div>
+    <div class="stat sol pill"><span class="ico">🪙</span><span id="t-sol">0</span></div>
+    <div class="stat xp pill"><span class="ico">⭐</span><span id="t-xp">0</span></div>
+    <div class="spacer"></div>
+    <div class="stat vidas pill"><span class="ico">❤️</span><span id="t-vidas">5</span></div>
+  </div>
+
+  <!-- Pantallas -->
+  <div class="screens" id="screens">
+    <!-- se rellenan por JS -->
+  </div>
+
+  <!-- Navegación inferior -->
+  <div class="navbar hidden" id="navbar">
+    <button class="navbtn on" data-nav="map"><span class="ico">🗺️</span>Aprender</button>
+    <button class="navbtn" data-nav="sims"><span class="ico">🧮</span>Simuladores</button>
+    <button class="navbtn" data-nav="finan"><span class="ico">🤖</span>FINAN</button>
+    <button class="navbtn" data-nav="profile"><span class="ico">👤</span>Perfil</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="overlay" id="overlay">
+    <div class="reward" id="reward"></div>
+  </div>
+</div>
+
+<script>
+/* ================= ESTADO GLOBAL (en memoria) ================= */
+const S = {
+  name:"", nivelPerfil:"Explorador",
+  lang:null,   // 'es' | 'en' | 'qu' | 'ay' — elegido al inicio
+  xp:0, sol:0, racha:1, vidas:5,
+  levels:{}, // id -> 'done'|'current'|'locked'
+  badges:new Set(),
+  salud:{presupuesto:0,ahorro:0,fondo:0,deuda:0,seguridad:0,conocimiento:0,metas:0},
+  screen:"welcome",
+  onboarded:false,   // true tras completar el diagnóstico
+  lastDay:null       // fecha ISO del último día activo (para la racha)
+};
+
+/* ================= PERSISTENCIA (offline-first) =================
+   Usa localStorage cuando está disponible (app descargada / instalada).
+   Si el entorno lo bloquea, cae de forma transparente a memoria. */
+const STORE_KEY = "finan_v1";
+let _mem = null;             // respaldo en memoria si no hay localStorage
+function _storageOK(){
+  try{ const k="__t"; localStorage.setItem(k,"1"); localStorage.removeItem(k); return true; }
+  catch(e){ return false; }
+}
+const HAS_LS = _storageOK();
+function saveState(){
+  const data = {
+    name:S.name, nivelPerfil:S.nivelPerfil, lang:S.lang, xp:S.xp, sol:S.sol, racha:S.racha,
+    vidas:S.vidas, levels:S.levels, badges:[...S.badges], salud:S.salud,
+    onboarded:S.onboarded, lastDay:S.lastDay
+  };
+  const json = JSON.stringify(data);
+  if(HAS_LS){ try{ localStorage.setItem(STORE_KEY,json); }catch(e){ _mem=json; } }
+  else _mem = json;
+}
+function loadState(){
+  let json = HAS_LS ? (()=>{try{return localStorage.getItem(STORE_KEY);}catch(e){return null;}})() : _mem;
+  if(!json) return false;
+  try{
+    const d = JSON.parse(json);
+    Object.assign(S, d);
+    S.badges = new Set(d.badges||[]);
+    return !!S.onboarded;
+  }catch(e){ return false; }
+}
+function clearState(){
+  if(HAS_LS){ try{ localStorage.removeItem(STORE_KEY); }catch(e){} }
+  _mem = null;
+}
+
+/* Definición de los 14 niveles */
+const LEVELS = [
+  {id:1, emoji:"💰", t:"Conozco mi dinero", play:"lesson"},
+  {id:2, emoji:"🧾", t:"¿Dónde se va mi dinero?", play:"survive"},
+  {id:3, emoji:"📊", t:"Aprendo a hacer presupuesto", play:"budget"},
+  {id:4, emoji:"🐷", t:"Aprendo a ahorrar", play:"saving"},
+  {id:5, emoji:"🛟", t:"Mi fondo de emergencia", play:"fondo"},
+  {id:6, emoji:"🏦", t:"Entiendo los bancos", play:"bancos"},
+  {id:7, emoji:"📱", t:"Mi dinero en el celular", play:"celular"},
+  {id:8, emoji:"💳", t:"Aprendo a usar tarjetas", play:"tarjetas"},
+  {id:9, emoji:"💵", t:"¿Me conviene un préstamo?", play:"credit"},
+  {id:10,emoji:"⚠️", t:"Evito el sobreendeudamiento", play:"deuda"},
+  {id:11,emoji:"🛡️", t:"Protejo mi dinero", play:"seguridad"},
+  {id:12,emoji:"🚨", t:"Detecto estafas", play:"scam"},
+  {id:13,emoji:"📈", t:"Mi primera inversión", play:"inversion"},
+  {id:14,emoji:"🎯", t:"Cumplo mis metas", play:"metas"},
+];
+
+const BADGES = [
+  {id:"primer_paso", ico:"🌱", n:"Primer paso"},
+  {id:"gastos_hormiga", ico:"🐜", n:"Cazador de hormigas"},
+  {id:"presupuesto", ico:"📊", n:"Presupuesto equilibrado"},
+  {id:"ahorrador", ico:"🐷", n:"Primer ahorro"},
+  {id:"fondo", ico:"🛟", n:"Fondo blindado"},
+  {id:"banquero", ico:"🏦", n:"Conoce sus bancos"},
+  {id:"digital", ico:"📱", n:"Dinero digital seguro"},
+  {id:"tarjeta", ico:"💳", n:"Tarjeta bajo control"},
+  {id:"credito", ico:"🧠", n:"Experto en crédito"},
+  {id:"equilibrio", ico:"⚖️", n:"Deuda saludable"},
+  {id:"guardian", ico:"🛡️", n:"Guardián de claves"},
+  {id:"anti_estafa", ico:"🚨", n:"Detector de estafas"},
+  {id:"inversor", ico:"📈", n:"Inversor principiante"},
+  {id:"metas", ico:"🎯", n:"Cumple sus metas"},
+  {id:"maestro", ico:"🏆", n:"Maestro de finanzas"},
+];
+
+/* ================= INTERNACIONALIZACIÓN (i18n) =================
+   Idiomas: es (español), en (English), qu (Runa Simi / quechua sureño),
+   ay (Aymara). Las cadenas de quechua y aymara son una base inicial que
+   debe ser revisada por hablantes nativos antes de un uso real. */
+const LANGS = [
+  {code:"es", flag:"🇵🇪", name:"Español",  native:"Español"},
+  {code:"qu", flag:"🏔️", name:"Quechua",  native:"Runa Simi"},
+  {code:"ay", flag:"🌄", name:"Aymara",   native:"Aymar Aru"},
+  {code:"en", flag:"🌎", name:"Inglés",   native:"English"},
+];
+
+const T = {
+  es:{
+    lang_title:"Elige tu idioma", lang_sub:"Puedes cambiarlo después en tu perfil",
+    nav_learn:"Aprender", nav_sims:"Simuladores", nav_finan:"FINAN", nav_profile:"Perfil",
+    w_title1:"Aprende a manejar", w_title2:"tu dinero", w_title3:"jugando",
+    w_sub:"Sin ser economista. Con ejemplos reales del Perú, en soles y a tu ritmo.",
+    w_name:"¿Cómo te llamas?", w_name_ph:"Tu nombre", w_start:"Empezar gratis",
+    w_offline:"📶 Funciona sin internet · 🆓 100% gratis",
+    b_continue:"Continuar", b_understood:"Entendido", b_confirm:"Confirmar", b_back_map:"Volver a mi mapa",
+    diag_tag:"Diagnóstico", diag_note:"No es un examen 😉 Solo queremos conocerte.",
+    diag_start_tag:"Tu punto de partida", diag_level:"Nivel", diag_route:"Diseñamos tu ruta de aprendizaje.",
+    diag_hits:"Acertaste", diag_of:"de", diag_seemap:"Ver mi mapa", diag_route_starts:"Tu ruta recomendada empieza en:",
+    map_hello:"Hola", map_route:"Tu ruta financiera", map_done:"niveles completados",
+    map_locked:"🔒 Completa el nivel anterior", map_soon:"🚧 Nivel en construcción — ¡pronto!",
+    maestro_lbl:"Maestro de mis finanzas", maestro_locked:"🔒 Completa los 14 niveles",
+    reward_continue:"¡Continuar!",
+    prof_lvl:"Nivel", prof_xp:"⭐ XP total", prof_coins:"🪙 soles ganados",
+    prof_levels:"📚 niveles", prof_badges:"🏅 insignias", prof_health:"Mi salud financiera",
+    prof_of100:"de 100", prof_opportunity:"💡 Tu oportunidad", prof_mybadges:"Mis insignias",
+    prof_reset:"Reiniciar demo", prof_lang:"🌐 Cambiar idioma",
+    health_good:"¡Vas muy bien! 🌟", health_mid:"Buen avance, sigue así 💪", health_low:"Recién empiezas, ¡lo mejor está por venir! 🚀",
+    finan_sub:"Tu asistente financiero", finan_hello:"👋 Soy FINAN. Pregúntame lo que quieras sobre tu dinero, con palabras sencillas.",
+    finan_disclaimer:"ℹ️ Esta información es educativa y no constituye una recomendación financiera personalizada.",
+    tudecides:"Tú decides", concepto:"Concepto", minireto:"Mini reto",
+    correct:"¡Correcto! 🎉", almost:"Casi… 💡",
+    lvl1:"Conozco mi dinero", lvl2:"¿Dónde se va mi dinero?", lvl3:"Aprendo a hacer presupuesto",
+    lvl4:"Aprendo a ahorrar", lvl5:"Mi fondo de emergencia", lvl6:"Entiendo los bancos",
+    lvl7:"Mi dinero en el celular", lvl8:"Aprendo a usar tarjetas", lvl9:"¿Me conviene un préstamo?",
+    lvl10:"Evito el sobreendeudamiento", lvl11:"Protejo mi dinero", lvl12:"Detecto estafas",
+    lvl13:"Mi primera inversión", lvl14:"Cumplo mis metas",
+  },
+  en:{
+    lang_title:"Choose your language", lang_sub:"You can change it later in your profile",
+    nav_learn:"Learn", nav_sims:"Simulators", nav_finan:"FINAN", nav_profile:"Profile",
+    w_title1:"Learn to manage", w_title2:"your money", w_title3:"by playing",
+    w_sub:"No economics degree needed. With real examples from Peru, in soles, at your own pace.",
+    w_name:"What's your name?", w_name_ph:"Your name", w_start:"Start free",
+    w_offline:"📶 Works offline · 🆓 100% free",
+    b_continue:"Continue", b_understood:"Got it", b_confirm:"Confirm", b_back_map:"Back to my map",
+    diag_tag:"Quick check", diag_note:"It's not a test 😉 We just want to know you.",
+    diag_start_tag:"Your starting point", diag_level:"Level", diag_route:"We've built your learning path.",
+    diag_hits:"You got", diag_of:"of", diag_seemap:"See my map", diag_route_starts:"Your recommended path starts at:",
+    map_hello:"Hi", map_route:"Your money path", map_done:"levels completed",
+    map_locked:"🔒 Finish the previous level", map_soon:"🚧 Level under construction — soon!",
+    maestro_lbl:"Master of my finances", maestro_locked:"🔒 Complete all 14 levels",
+    reward_continue:"Continue!",
+    prof_lvl:"Level", prof_xp:"⭐ Total XP", prof_coins:"🪙 soles earned",
+    prof_levels:"📚 levels", prof_badges:"🏅 badges", prof_health:"My financial health",
+    prof_of100:"of 100", prof_opportunity:"💡 Your opportunity", prof_mybadges:"My badges",
+    prof_reset:"Reset demo", prof_lang:"🌐 Change language",
+    health_good:"You're doing great! 🌟", health_mid:"Good progress, keep going 💪", health_low:"Just getting started — the best is yet to come! 🚀",
+    finan_sub:"Your financial assistant", finan_hello:"👋 I'm FINAN. Ask me anything about your money, in simple words.",
+    finan_disclaimer:"ℹ️ This information is educational and is not personalized financial advice.",
+    tudecides:"You decide", concepto:"Concept", minireto:"Mini challenge",
+    correct:"Correct! 🎉", almost:"Almost… 💡",
+    lvl1:"I know my money", lvl2:"Where does my money go?", lvl3:"I learn to budget",
+    lvl4:"I learn to save", lvl5:"My emergency fund", lvl6:"I understand banks",
+    lvl7:"My money on my phone", lvl8:"I learn to use cards", lvl9:"Is a loan worth it?",
+    lvl10:"I avoid over-indebtedness", lvl11:"I protect my money", lvl12:"I spot scams",
+    lvl13:"My first investment", lvl14:"I reach my goals",
+  },
+  qu:{
+    lang_title:"Rimayniykita akllay", lang_sub:"Perfilniykipi tikrachiwaqmi qhipaman",
+    nav_learn:"Yachay", nav_sims:"Yupana", nav_finan:"FINAN", nav_profile:"Perfil",
+    w_title1:"Qullqiykita allin", w_title2:"kamachiyta", w_title3:"pukllaspa yachay",
+    w_sub:"Mana economista kaspapas. Perú suyumanta chiqaq kawsaykunawan, solespi, kikin ñanniykipi.",
+    w_name:"¿Iman sutiyki?", w_name_ph:"Sutiyki", w_start:"Qallariy (qasilla)",
+    w_offline:"📶 Mana internetwan llamk'an · 🆓 Qasilla",
+    b_continue:"Qatiy", b_understood:"Yacharqanin", b_confirm:"Takyachiy", b_back_map:"Mapayman kutiy",
+    diag_tag:"Tapuykuna", diag_note:"Manam yachay tupuychu 😉 Riqsisunaykillapaqmi.",
+    diag_start_tag:"Maymantam qallarinki", diag_level:"Pata", diag_route:"Yachana ñanniykita wakichirqaniku.",
+    diag_hits:"Allinta churanki", diag_of:"chaymanta", diag_seemap:"Mapayta qhaway", diag_route_starts:"Ñanniyki kaypim qallarin:",
+    map_hello:"Napaykullayki", map_route:"Qullqi ñanniyki", map_done:"patakuna tukusqa",
+    map_locked:"🔒 Ñawpaq patata tukuy", map_soon:"🚧 Patataraqmi ruwakushan — ¡ñaqhalla!",
+    maestro_lbl:"Qullqiypa Yachaqnin", maestro_locked:"🔒 Chunka tawayuq patata tukuy",
+    reward_continue:"¡Qatiy!",
+    prof_lvl:"Pata", prof_xp:"⭐ XP llapan", prof_coins:"🪙 soles ganasqa",
+    prof_levels:"📚 patakuna", prof_badges:"🏅 insignias", prof_health:"Qullqi allin kayniy",
+    prof_of100:"100manta", prof_opportunity:"💡 Allinchanaykipaq", prof_mybadges:"Insigniaykuna",
+    prof_reset:"Demota qallariy", prof_lang:"🌐 Rimay tikray",
+    health_good:"¡Allintam rinki! 🌟", health_mid:"Allin puriy, hinallaña 💪", health_low:"Qallarishankiraqmi, ¡aswan allinqa hamunqaraqmi! 🚀",
+    finan_sub:"Qullqi yanapaqniyki", finan_hello:"👋 FINAN kani. Qullqiykimanta imatapas tapuway, facil rimaywan.",
+    finan_disclaimer:"ℹ️ Kay willakuyqa yachachinallapaqmi, manam sapaq qullqi yuyaychaychu.",
+    tudecides:"Qanmi akllanki", concepto:"Yachay", minireto:"Huch'uy llalliy",
+    correct:"¡Allinmi! 🎉", almost:"Ñañ… 💡",
+    lvl1:"Qullqiyta riqsini", lvl2:"¿Maymantaq qullqiy rin?", lvl3:"Presupuestota ruwayta yachani",
+    lvl4:"Waqaychayta yachani", lvl5:"Emergencia waqaychayniy", lvl6:"Bancokunata hamut'ani",
+    lvl7:"Qullqiy celularpi", lvl8:"Tarjetakunata apayta yachani", lvl9:"¿Prestamota mañakusaqchu?",
+    lvl10:"Ancha manuymanta hark'akuni", lvl11:"Qullqiyta amachani", lvl12:"Suwakuykunata riqsini",
+    lvl13:"Ñawpaq inversionniy", lvl14:"Munayniykunata hunt'ani",
+  },
+  ay:{
+    lang_title:"Aru ajllim", lang_sub:"Perfilan kutinjam churakismawa",
+    nav_learn:"Yatiqaña", nav_sims:"Jakhuña", nav_finan:"FINAN", nav_profile:"Perfil",
+    w_title1:"Qullqim suma", w_title2:"apnaqaña", w_title3:"anataspa yatiqam",
+    w_sub:"Janiw economista kañamakiti. Perú markan chiqa uñstawinakampi, solesampi, juman sarnaqäwimarjama.",
+    w_name:"¿Kunas sutimaxa?", w_name_ph:"Sutima", w_start:"Qalltaña (inaki)",
+    w_offline:"📶 Jan internetampi irnaqi · 🆓 Inaki",
+    b_continue:"Sarantaña", b_understood:"Yatxta", b_confirm:"Chiqañchaña", b_back_map:"Mapajar kutiña",
+    diag_tag:"Jiskt'awinaka", diag_note:"Janiw yant'awïkiti 😉 Uñt'añatakikiwa.",
+    diag_start_tag:"Kawkinsa qalltäta", diag_level:"Patxa", diag_route:"Yatiqañ thakhima wakichtanwa.",
+    diag_hits:"Sumwa uchta", diag_of:"ukanakata", diag_seemap:"Mapaj uñjaña", diag_route_starts:"Thakhimax akanwa qallti:",
+    map_hello:"Kamisaraki", map_route:"Qullqi thakhima", map_done:"patxanaka tukuyata",
+    map_locked:"🔒 Nayra patxa tukuyañma", map_soon:"🚧 Patxaxa lurasiskakiwa — ¡jank'aki!",
+    maestro_lbl:"Qullqin Yatxatirïpa", maestro_locked:"🔒 Tunka pusini patxa tukuyañma",
+    reward_continue:"¡Sarantaña!",
+    prof_lvl:"Patxa", prof_xp:"⭐ Taqi XP", prof_coins:"🪙 soles katuqata",
+    prof_levels:"📚 patxanaka", prof_badges:"🏅 insignianaka", prof_health:"Qullqi qhana kankañaja",
+    prof_of100:"100 ukanakata", prof_opportunity:"💡 Sumapt'añamataki", prof_mybadges:"Insignianakaja",
+    prof_reset:"Demo qalltaña", prof_lang:"🌐 Aru mayjt'aña",
+    health_good:"¡Sumwa sarasksta! 🌟", health_mid:"Suma sarantawi, ukhamaskakim 💪", health_low:"Qalltasksakiwa, ¡juk'ampi sumaxa jutaskaniwa! 🚀",
+    finan_sub:"Qullqi yanapt'irima", finan_hello:"👋 FINAN sutinïtwa. Qullqimata kuns jiskt'ita, jasa arunakampi.",
+    finan_disclaimer:"ℹ️ Aka yatiyawix yatichañatakikiwa, janiw sapa qullqi iwxañäkiti.",
+    tudecides:"Jumaw ajllta", concepto:"Yatiña", minireto:"Jisk'a atipaña",
+    correct:"¡Chiqawa! 🎉", almost:"Jak'awa… 💡",
+    lvl1:"Qullqija uñt'ta", lvl2:"¿Kawkirus qullqijax saraski?", lvl3:"Presupuesto lurañ yatiqta",
+    lvl4:"Imañ yatiqta", lvl5:"Emergencia imañaja", lvl6:"Bancunak amuyta",
+    lvl7:"Qullqijax celularana", lvl8:"Tarjetanak apnaqañ yatiqta", lvl9:"¿Prestamo mayisïñajati?",
+    lvl10:"Manu apthapiñat jark'aqasiña", lvl11:"Qullqija jark'aqta", lvl12:"Lunthatäwinak uñt'ta",
+    lvl13:"Nayrïr inversionaja", lvl14:"Munañanakaj phuqhta",
+  },
+};
+function t(k){ const L=S.lang||"es"; return (T[L]&&T[L][k]!=null)?T[L][k]:(T.es[k]!=null?T.es[k]:k); }
+function levelTitle(id){ return t("lvl"+id); }
+function applyNavLabels(){
+  const map={map:"nav_learn",sims:"nav_sims",finan:"nav_finan",profile:"nav_profile"};
+  document.querySelectorAll(".navbtn").forEach(b=>{
+    const k=map[b.dataset.nav]; if(!k) return;
+    const ico=b.querySelector(".ico").outerHTML;
+    b.innerHTML=ico+t(k);
+  });
+}
+function setLang(code){ S.lang=code; saveState(); applyNavLabels(); }
+
+/* ================= UTILIDADES ================= */
+const $ = s => document.querySelector(s);
+const screensEl = $("#screens");
+const soles = n => "S/ " + Number(n).toLocaleString("es-PE");
+
+function updateTop(){
+  $("#t-xp").textContent=S.xp; $("#t-sol").textContent=S.sol;
+  $("#t-vidas").textContent=S.vidas; $("#t-racha").textContent=S.racha;
+}
+function toast(msg){
+  const t=$("#toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove("show"),1900);
+}
+function award(xp,sol){
+  S.xp+=xp; S.sol+=sol; updateTop(); saveState();
+}
+function unlockBadge(id){
+  if(S.badges.has(id)) return;
+  S.badges.add(id); saveState();
+  const b=BADGES.find(x=>x.id===id);
+  if(b) setTimeout(()=>toast("🏅 Insignia: "+b.n),400);
+}
+function showChrome(v){
+  $("#topbar").classList.toggle("hidden",!v);
+  $("#navbar").classList.toggle("hidden",!v);
+  if(v) applyNavLabels();
+}
+function setNav(name){
+  document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("on",b.dataset.nav===name));
+}
+
+/* Router de pantallas */
+function render(html){ screensEl.innerHTML = '<div class="screen active">'+html+'</div>'; screensEl.scrollTop=0; }
+function go(name){ S.screen=name; ROUTES[name](); }
+
+/* Overlay de recompensa */
+function reward({emoji,title,sub,xp,sol,badge,then}){
+  if(badge) unlockBadge(badge);
+  const r=$("#reward");
+  r.innerHTML=`
+    <div class="r-emoji">${emoji}</div>
+    <h2 style="margin-top:8px">${title}</h2>
+    <p class="muted" style="margin-top:6px;font-weight:700">${sub||""}</p>
+    <div class="r-rewards">
+      ${xp?`<div class="r-chip"><div class="v" style="color:var(--violeta)">+${xp}</div><small>⭐ XP</small></div>`:""}
+      ${sol?`<div class="r-chip"><div class="v" style="color:var(--sol-dark)">+${sol}</div><small>🪙 soles</small></div>`:""}
+    </div>
+    <button class="btn" id="reward-ok">${t("reward_continue")}</button>`;
+  $("#overlay").classList.add("show");
+  if(xp||sol) award(xp||0,sol||0);
+  $("#reward-ok").onclick=()=>{ $("#overlay").classList.remove("show"); if(then) then(); };
+}
+
+/* ================= PANTALLAS ================= */
+const ROUTES = {};
+
+/* ---- Selección de idioma (primera pantalla) ---- */
+ROUTES.chooseLang = () => {
+  showChrome(false);
+  render(`
+    <div style="height:100%;display:flex;flex-direction:column;justify-content:center">
+      <div class="center">
+        <div style="font-size:64px">🌍</div>
+        <div class="spacer-s"></div>
+        <h1>Elige tu idioma</h1>
+        <p class="muted" style="font-weight:700;margin-top:6px">Choose your language · Rimayniykita akllay · Aru ajllim</p>
+      </div>
+      <div class="spacer-l"></div>
+      <div id="langs"></div>
+    </div>`);
+  const box=$("#langs");
+  LANGS.forEach(l=>{
+    const b=document.createElement("button");
+    b.className="opt"; b.style.padding="16px";
+    b.innerHTML=`<span class="lead" style="font-size:22px;background:var(--verde-soft)">${l.flag}</span>
+      <span style="flex:1"><b style="font-size:16px">${l.native}</b>
+      <br><small class="muted" style="font-weight:700">${l.name}</small></span>
+      <span style="font-size:20px;color:var(--gris-soft)">›</span>`;
+    b.onclick=()=>{ setLang(l.code); go("welcome"); };
+    box.appendChild(b);
+  });
+};
+
+/* ---- Bienvenida ---- */
+ROUTES.welcome = () => {
+  showChrome(false);
+  render(`
+    <div style="height:100%;display:flex;flex-direction:column;justify-content:center;text-align:center">
+      <div style="font-size:80px;animation:bob 2.4s ease-in-out infinite">🪙</div>
+      <div class="spacer-s"></div>
+      <h1>${t("w_title1")}<br>${t("w_title2")} <span style="color:var(--verde-dark)">${t("w_title3")}</span></h1>
+      <div class="spacer-s"></div>
+      <p class="muted" style="font-weight:700;padding:0 10px">${t("w_sub")}</p>
+      <div class="spacer-l"></div>
+      <div class="card" style="text-align:left">
+        <label style="font-weight:800;font-size:13px" for="nm">${t("w_name")}</label>
+        <input id="nm" placeholder="${t("w_name_ph")}" autocomplete="off"
+          style="width:100%;margin-top:8px;padding:14px;border:2px solid var(--linea);
+          border-radius:14px;font-family:inherit;font-weight:700;font-size:16px;outline:none">
+      </div>
+      <div class="spacer-m"></div>
+      <button class="btn" id="start">${t("w_start")}</button>
+      <div class="spacer-s"></div>
+      <p class="small muted" style="font-weight:700">${t("w_offline")}</p>
+    </div>`);
+  const inp=$("#nm"); inp.oninput=()=>{ const v=inp.value.trim(); };
+  $("#start").onclick=()=>{
+    S.name=($("#nm").value.trim()||"Amig@");
+    go("diagnostic");
+  };
+};
+
+/* ---- Diagnóstico inicial (tipo juego) ---- */
+const DIAG=[
+  {q:"Si tienes S/ 1,000 y gastas S/ 1,200… ¿qué está pasando?",
+   opts:["Estoy ahorrando","Estoy gastando más de lo que gano","Estoy invirtiendo"], ok:1,
+   dim:"conocimiento"},
+  {q:"Pagar solo el mínimo de tu tarjeta cada mes significa…",
+   opts:["Que no pago intereses","Que la deuda baja rápido","Que pago más intereses y la deuda dura más"], ok:2,
+   dim:"deuda"},
+  {q:"Te llega un enlace: «Tu cuenta será bloqueada, ingresa aquí». ¿Qué haces?",
+   opts:["Ingreso rápido para no perder mi cuenta","Ignoro y verifico por el canal oficial del banco","Comparto mi clave para confirmar"], ok:1,
+   dim:"seguridad"},
+  {q:"¿Cuál es la diferencia entre ahorrar e invertir?",
+   opts:["Son exactamente lo mismo","Ahorrar guarda dinero; invertir busca que crezca asumiendo riesgo","Invertir es guardar dinero sin riesgo"], ok:1,
+   dim:"conocimiento"},
+];
+ROUTES.diagnostic = () => {
+  showChrome(false);
+  let i=0, aciertos=0;
+  const paint=()=>{
+    const d=DIAG[i];
+    render(`
+      <div class="lesson-head">
+        <div class="prog sol"><i style="width:${(i/DIAG.length)*100}%"></i></div>
+        <span class="small muted" style="font-weight:900">${i+1}/${DIAG.length}</span>
+      </div>
+      <span class="tag sol">${t("diag_tag")}</span>
+      <div class="spacer-s"></div>
+      <h2>${d.q}</h2>
+      <p class="small muted" style="font-weight:700;margin-top:4px">${t("diag_note")}</p>
+      <div class="spacer-m"></div>
+      <div id="opts"></div>`);
+    const box=$("#opts");
+    d.opts.forEach((o,k)=>{
+      const b=document.createElement("button");
+      b.className="opt"; b.innerHTML=`<span class="lead">${"ABC"[k]}</span><span>${o}</span>`;
+      b.onclick=()=>{
+        [...box.children].forEach(c=>c.disabled=true);
+        if(k===d.ok){ b.classList.add("correct"); aciertos++; S.salud[d.dim]+=25; }
+        else{ b.classList.add("wrong"); box.children[d.ok].classList.add("correct"); }
+        setTimeout(()=>{ i++; i<DIAG.length?paint():finish(); },900);
+      };
+      box.appendChild(b);
+    });
+  };
+  const finish=()=>{
+    // nivel según aciertos
+    S.nivelPerfil = aciertos>=3?"Aprendiz":"Explorador";
+    // inicializa progreso: nivel 1 disponible
+    LEVELS.forEach(l=> S.levels[l.id]= l.id===1?"current":"locked");
+    S.salud.conocimiento=Math.min(100,20+aciertos*15);
+    S.onboarded=true; S.lastDay=todayISO(); saveState();
+    updateTop();
+    render(`
+      <div style="height:100%;display:flex;flex-direction:column;justify-content:center;text-align:center">
+        <div style="font-size:72px" >🧭</div>
+        <div class="spacer-s"></div>
+        <span class="tag verde">${t("diag_start_tag")}</span>
+        <div class="spacer-s"></div>
+        <h1>${t("diag_level")}: <span style="color:var(--verde-dark)">${S.nivelPerfil}</span></h1>
+        <div class="spacer-s"></div>
+        <p class="muted" style="font-weight:700">${t("diag_hits")} ${aciertos} ${t("diag_of")} ${DIAG.length}. ${t("diag_route")}</p>
+        <div class="spacer-l"></div>
+        <div class="card" style="text-align:left">
+          <h3>${t("diag_route_starts")}</h3>
+          <div class="spacer-s"></div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-size:38px">💰</div>
+            <div><b style="font-size:15px">${t("prof_lvl")} 1 · ${levelTitle(1)}</b></div>
+          </div>
+        </div>
+        <div class="spacer-m"></div>
+        <button class="btn" id="toMap">${t("diag_seemap")}</button>
+      </div>`);
+    $("#toMap").onclick=()=>{ unlockBadge("primer_paso"); go("map"); };
+  };
+  paint();
+};
+
+/* ---- Mapa de niveles ---- */
+ROUTES.map = () => {
+  showChrome(true); setNav("map");
+  const done=LEVELS.filter(l=>S.levels[l.id]==="done").length;
+  let html=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div><span class="tag verde">${t("map_hello")}, ${S.name} 👋</span>
+      <h2 style="margin-top:8px">${t("map_route")}</h2></div>
+    </div>
+    <div class="spacer-s"></div>
+    <div class="prog"><i style="width:${(done/LEVELS.length)*100}%"></i></div>
+    <p class="small muted" style="font-weight:800;margin-top:6px">${done} / ${LEVELS.length} ${t("map_done")}</p>
+    <div class="spacer-m"></div>
+    <div class="map-path">`;
+  LEVELS.forEach((l,idx)=>{
+    const st=S.levels[l.id]||"locked";
+    const zig= idx%2===0?"zig":"zag";
+    if(idx>0) html+=`<div class="connector ${S.levels[LEVELS[idx-1].id]==='done'?'done':''}"></div>`;
+    html+=`<div class="node ${st} ${zig}" data-lvl="${l.id}">
+        <div class="dot">${st==='locked'?'🔒':l.emoji}</div>
+        <div><div class="lvl-num">${t("prof_lvl")} ${l.id}</div><div class="lbl">${levelTitle(l.id)}</div></div>
+      </div>`;
+  });
+  html+=`</div>`;
+  // Nodo final: Maestro de finanzas
+  const allDone = LEVELS.every(l=>S.levels[l.id]==="done");
+  html+=`<div class="connector ${allDone?'done':''}"></div>
+    <div class="node ${allDone?'current':'locked'}" id="maestro-node" style="justify-content:center">
+      <div class="dot" style="width:78px;height:78px;font-size:38px">${allDone?'🏆':'🔒'}</div></div>
+    <p class="center" style="font-weight:900;margin-top:4px;color:${allDone?'var(--sol-dark)':'var(--gris-soft)'}">${t("maestro_lbl")}</p>
+    <div class="spacer-m"></div>`;
+  render(html);
+  const mNode=document.getElementById("maestro-node");
+  if(mNode) mNode.querySelector(".dot").onclick=()=> allDone?go("maestro"):toast(t("maestro_locked"));
+  document.querySelectorAll(".node").forEach(n=>{
+    const id=+n.dataset.lvl, st=S.levels[id];
+    if(st==="locked"){ n.querySelector(".dot").onclick=()=>toast(t("map_locked")); return; }
+    n.querySelector(".dot").onclick=()=>openLevel(id);
+  });
+};
+
+function openLevel(id){
+  const l=LEVELS.find(x=>x.id===id);
+  if(l.play==="soon"){ toast(t("map_soon")); return; }
+  PLAY[l.play](id);
+}
+
+/* Completar un nivel: marca done y desbloquea siguiente */
+function completeLevel(id){
+  S.levels[id]="done";
+  const next=LEVELS.find(x=>x.id===id+1);
+  if(next && S.levels[next.id]==="locked") S.levels[next.id]="current";
+  // ¿completó los 14? -> Maestro de finanzas
+  const done=LEVELS.filter(l=>S.levels[l.id]==="done").length;
+  if(done===LEVELS.length && !S.badges.has("maestro")){
+    S.nivelPerfil="Maestro"; unlockBadge("maestro");
+  }
+  saveState();
+}
+
+/* ================= MINI-JUEGOS / LECCIONES ================= */
+const PLAY={};
+
+/* ---- Nivel 1: Lección "gastos hormiga" (Carlos) ---- */
+PLAY.lesson=(id)=>{
+  showChrome(false);
+  let step=0;
+  const gastos=[["☕","Café",8],["🍔","Menú",15],["🚕","Taxi",12],["🎮","Juego",20],["🛒","Antojos",25]];
+  const total=gastos.reduce((a,g)=>a+g[2],0);
+  const steps=[
+    ()=>`
+      <div class="scene"><div class="avatar">🧑🏽</div>
+        <div class="bubble">Hola, soy <b>Carlos</b>. Cada mes recibo <b>${soles(2000)}</b> de sueldo… pero nunca me alcanza. 🤔</div></div>
+      <h2>El sueldo de Carlos</h2>
+      <p class="muted" style="font-weight:700;margin-top:6px">Vamos a descubrir juntos a dónde se va su dinero.</p>`,
+    ()=>`
+      <h2>Sus gastos de un día cualquiera</h2>
+      <p class="muted" style="font-weight:700;margin:6px 0 14px">Parecen pequeños… ¿verdad?</p>
+      <div class="card">
+        ${gastos.map(g=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--linea);font-weight:800">
+          <span>${g[0]} ${g[1]}</span><span class="soles">${soles(g[2])}</span></div>`).join("")}
+        <div style="display:flex;justify-content:space-between;padding:12px 0 2px;font-weight:900;font-size:17px">
+          <span>Total del día</span><span class="soles" style="color:var(--coral)">${soles(total)}</span></div>
+      </div>
+      <p class="small muted" style="font-weight:700;margin-top:12px">👉 ¿Crees que estos gastos tan pequeños afectan su presupuesto?</p>`,
+    ()=>`
+      <h2>Ahora multiplícalo por el mes 📅</h2>
+      <div class="spacer-s"></div>
+      <div class="kpi">
+        <div class="k"><b>${soles(total)}</b><span>en 1 día</span></div>
+        <div class="k"><b>${soles(total*30)}</b><span>en 30 días</span></div>
+      </div>
+      <div class="spacer-m"></div>
+      <div class="card" style="background:var(--coral-soft);border-color:var(--coral)">
+        <b style="font-size:15px;color:var(--coral)">${soles(total*30)} al mes</b>
+        <p style="font-weight:700;margin-top:4px">Eso es el <b>${Math.round(total*30/2000*100)}%</b> del sueldo de Carlos… ¡en cosas que casi no recuerda haber comprado!</p>
+      </div>`,
+  ];
+  const decision=()=>{
+    render(head(step)+`
+      <span class="tag sol">Tú decides</span>
+      <div class="spacer-s"></div>
+      <h2>¿Qué debería hacer Carlos?</h2>
+      <div class="spacer-m"></div>
+      <div id="opts"></div>`);
+    const opts=[
+      ["Dejar de gastar en todo y no disfrutar nada",false,"Ser demasiado estricto no funciona a largo plazo. El equilibrio es la clave."],
+      ["Anotar sus gastos y recortar los que menos valora",true,"¡Exacto! No se trata de sufrir, sino de decidir con conciencia."],
+      ["Pedir un préstamo para llegar a fin de mes",false,"Endeudarse por gastos diarios es una trampa peligrosa."],
+    ];
+    const box=$("#opts");
+    opts.forEach((o,k)=>{
+      const b=document.createElement("button");
+      b.className="opt"; b.innerHTML=`<span class="lead">${"ABC"[k]}</span><span>${o[0]}</span>`;
+      b.onclick=()=>{
+        [...box.children].forEach(c=>c.disabled=true);
+        b.classList.add(o[1]?"correct":"wrong");
+        if(!o[1]){ box.children[1].classList.add("correct"); S.vidas=Math.max(0,S.vidas-1); updateTop(); }
+        showFeedback(o[1],o[2],()=>{ step++; paint(); });
+      };
+      box.appendChild(b);
+    });
+  };
+  const explain=()=>{
+    render(head(step)+`
+      <div style="font-size:52px;text-align:center">🐜</div>
+      <div class="spacer-s"></div>
+      <span class="tag verde">Concepto</span>
+      <h2 style="margin-top:8px">Los "gastos hormiga"</h2>
+      <div class="spacer-s"></div>
+      <p style="font-weight:700;line-height:1.5">Son gastos <b>pequeños y frecuentes</b> que, sumados, se convierten en una cantidad grande sin que te des cuenta.</p>
+      <div class="spacer-m"></div>
+      <div class="card">
+        <b>La regla de oro 🌟</b>
+        <p style="font-weight:700;margin-top:6px">No tienes que eliminarlos todos. Solo <b>identifícalos</b> y decide cuáles valen la pena para ti.</p>
+      </div>`);
+  };
+  const challenge=()=>{
+    render(head(step)+`
+      <span class="tag violeta">Mini reto</span>
+      <div class="spacer-s"></div>
+      <h2>Ayuda a Carlos a recortar</h2>
+      <p class="muted" style="font-weight:700;margin:6px 0 4px">Toca los gastos que él podría <b>reducir</b> para ahorrar. Elige al menos 2.</p>
+      <div class="money-row" id="chips"></div>
+      <div class="card" style="background:var(--verde-soft);border-color:var(--verde)">
+        <div style="display:flex;justify-content:space-between;font-weight:900">
+          <span>Ahorro mensual estimado</span><span id="save" class="soles" style="color:var(--verde-dark)">S/ 0</span></div>
+      </div>
+      <div class="spacer-m"></div>
+      <button class="btn" id="done" disabled>Confirmar recorte</button>`);
+    const chips=$("#chips"); let picked=new Set();
+    gastos.forEach((g,k)=>{
+      const c=document.createElement("button");
+      c.className="chip"; c.textContent=`${g[0]} ${soles(g[2])}`;
+      c.onclick=()=>{
+        if(picked.has(k)){picked.delete(k);c.classList.remove("sel");}
+        else{picked.add(k);c.classList.add("sel");}
+        const s=[...picked].reduce((a,i)=>a+gastos[i][2],0)*30;
+        $("#save").textContent=soles(s);
+        $("#done").disabled=picked.size<2;
+      };
+      chips.appendChild(c);
+    });
+    $("#done").onclick=()=>{
+      const s=[...picked].reduce((a,i)=>a+gastos[i][2],0)*30;
+      S.salud.conocimiento=Math.min(100,S.salud.conocimiento+20);
+      completeLevel(id);
+      reward({emoji:"🏆",title:"¡Descubriste los gastos hormiga!",
+        sub:`Ayudaste a Carlos a ahorrar ~${soles(s)} al mes.`,
+        xp:30,sol:15,badge:"gastos_hormiga",then:()=>go("map")});
+    };
+  };
+  function head(st){
+    const totalSteps=6;
+    return `<div class="lesson-head">
+      <button class="x" onclick="if(confirm('¿Salir de la lección? Perderás el progreso de este nivel.'))go('map')">✕</button>
+      <div class="prog"><i style="width:${(st/totalSteps)*100}%"></i></div></div>`;
+  }
+  function paint(){
+    if(step<3){ // escenas narrativas
+      render(head(step)+steps[step]()+`<div class="spacer-l"></div>
+        <button class="btn" id="next">Continuar</button>`);
+      $("#next").onclick=()=>{ step++; paint(); };
+    } else if(step===3){ decision(); }
+    else if(step===4){ explain(); render(document.querySelector('.screen').innerHTML+
+        `<div class="spacer-l"></div><button class="btn" id="next">Entendido</button>`);
+        $("#next").onclick=()=>{ step++; paint(); }; }
+    else { challenge(); }
+  }
+  paint();
+};
+
+/* Feedback deslizante correcto/incorrecto */
+function showFeedback(ok,text,then){
+  const scr=document.querySelector(".screen");
+  const f=document.createElement("div");
+  f.className="feedback "+(ok?"ok":"no");
+  f.innerHTML=`<h3 class="${ok?'ok-t':'no-t'}">${ok?'¡Correcto! 🎉':'Casi… 💡'}</h3>
+    <p style="font-weight:700;margin:6px 0 12px;line-height:1.4">${text}</p>
+    <button class="btn ${ok?'':'sol'}" id="fb-next">Continuar</button>`;
+  scr.appendChild(f);
+  $("#fb-next").onclick=()=>{ f.remove(); then(); };
+}
+
+/* ---- Nivel 2: Sobrevive al mes ---- */
+PLAY.survive=(id)=>{
+  showChrome(false);
+  let budget=2000; const cats=[
+    ["🍚","Alimentación",500,"necesidad"],["🏠","Vivienda",600,"necesidad"],
+    ["🚌","Transporte",200,"necesidad"],["🎉","Entretenimiento",150,"deseo"],
+    ["💳","Deudas",200,"necesidad"],["🐷","Ahorro",250,"meta"],["📦","Otros",100,"deseo"]];
+  render(`<div class="lesson-head">
+      <button class="x" onclick="go('map')">✕</button>
+      <div class="prog sol"><i style="width:100%"></i></div></div>
+    <span class="tag sol">Nivel 2 · Juego</span>
+    <h2 style="margin-top:8px">Sobrevive al mes con ${soles(2000)}</h2>
+    <p class="muted" style="font-weight:700;margin:6px 0 12px">Reparte el ingreso de Rosa. Ajusta cada categoría y busca equilibrio: cubrir lo necesario y ¡ahorrar algo!</p>
+    <div id="sim"></div>
+    <div class="result-box" id="rb"></div>
+    <div class="spacer-m"></div>
+    <button class="btn" id="fin">Terminar el mes</button>`);
+  const sim=$("#sim");
+  cats.forEach((c,k)=>{
+    const row=document.createElement("div"); row.className="slider-row";
+    row.innerHTML=`<label><span>${c[0]} ${c[1]}</span><b class="soles" id="v${k}">${soles(c[2])}</b></label>
+      <input type="range" min="0" max="900" step="10" value="${c[2]}" id="r${k}">`;
+    sim.appendChild(row);
+  });
+  function recalc(){
+    let used=0; cats.forEach((c,k)=>{ const v=+$("#r"+k).value; used+=v; $("#v"+k).textContent=soles(v); });
+    const left=budget-used; const ahorro=+$("#r5").value;
+    $("#rb").innerHTML=`
+      <div class="rb-row"><span>Ingreso</span><b class="soles">${soles(budget)}</b></div>
+      <div class="rb-row"><span>Repartido</span><b class="soles">${soles(used)}</b></div>
+      <div class="rb-row" style="border-top:1px solid #334155;margin-top:4px;padding-top:8px">
+        <span>Saldo</span><b class="soles ${left<0?'':''}" style="color:${left<0?'#FCA5A5':'#6EE7B7'}">${soles(left)}</b></div>`;
+    const fin=$("#fin");
+    if(left<0){ fin.textContent="Te pasaste del presupuesto"; fin.disabled=true; fin.style.opacity=.5; }
+    else{ fin.textContent="Terminar el mes"; fin.disabled=false; fin.style.opacity=1; }
+  }
+  cats.forEach((c,k)=> $("#r"+k).oninput=recalc); recalc();
+  $("#fin").onclick=()=>{
+    const ahorro=+$("#r5").value; const left=budget-cats.reduce((a,c,k)=>a+ +$("#r"+k).value,0);
+    S.salud.ahorro=Math.min(100,ahorro/250*70);
+    S.salud.presupuesto=Math.min(100,S.salud.presupuesto+40);
+    completeLevel(id);
+    const bien = ahorro>=150;
+    reward({emoji:bien?"🎉":"👍",title:bien?"¡Mes equilibrado!":"¡Sobreviviste al mes!",
+      sub:bien?`Ahorraste ${soles(ahorro)}. Rosa está feliz.`:`Ahorraste ${soles(ahorro)}. Con práctica ahorrarás más.`,
+      xp:25,sol:12,then:()=>go("map")});
+  };
+};
+
+/* ---- Nivel 3: Simulador de presupuesto ---- */
+PLAY.budget=(id)=>{ buildBudget(id,true); };
+function buildBudget(id,fromLevel){
+  showChrome(!fromLevel); if(!fromLevel) setNav("sims");
+  const back = fromLevel?`<button class="x" onclick="go('map')">✕</button>`:"";
+  render(`${fromLevel?`<div class="lesson-head">${back}<div class="prog"><i style="width:100%"></i></div></div>`:""}
+    <span class="tag verde">${fromLevel?'Nivel 3':'Simulador'}</span>
+    <h2 style="margin-top:8px">Mi presupuesto personal</h2>
+    <p class="muted" style="font-weight:700;margin:6px 0 14px">Ingresa tus números reales. La regla <b>50/30/20</b> es una buena guía.</p>
+    <div class="card">
+      <div class="slider-row" style="margin-top:0">
+        <label><span>💵 Ingreso mensual</span><b class="soles" id="vIng">${soles(1500)}</b></label>
+        <input type="range" min="500" max="6000" step="50" value="1500" id="ing"></div>
+      <div class="slider-row"><label><span>🏠 Necesidades (casa, comida, transporte)</span><b class="soles" id="vNec">${soles(750)}</b></label>
+        <input type="range" min="0" max="6000" step="50" value="750" id="nec"></div>
+      <div class="slider-row"><label><span>🎉 Deseos (salidas, antojos)</span><b class="soles" id="vDes">${soles(450)}</b></label>
+        <input type="range" min="0" max="6000" step="50" value="450" id="des"></div>
+      <div class="slider-row" style="margin-bottom:0"><label><span>💳 Deudas</span><b class="soles" id="vDeu">${soles(0)}</b></label>
+        <input type="range" min="0" max="4000" step="50" value="0" id="deu"></div>
+    </div>
+    <div class="spacer-s"></div>
+    <div class="donut"><canvas id="dn" width="260" height="260"></canvas></div>
+    <div class="legend" id="lg"></div>
+    <div class="spacer-s"></div>
+    <div class="card" id="advice"></div>
+    ${fromLevel?'<div class="spacer-m"></div><button class="btn" id="fin">Guardar mi presupuesto</button>':''}`);
+  const ids=["ing","nec","des","deu"];
+  function draw(){
+    const ing=+$("#ing").value, nec=+$("#nec").value, des=+$("#des").value, deu=+$("#deu").value;
+    $("#vIng").textContent=soles(ing);$("#vNec").textContent=soles(nec);
+    $("#vDes").textContent=soles(des);$("#vDeu").textContent=soles(deu);
+    const ahorro=Math.max(0,ing-nec-des-deu);
+    const parts=[["Necesidades",nec,"#10B981"],["Deseos",des,"#F59E0B"],["Deudas",deu,"#EF4444"],["Ahorro",ahorro,"#8B5CF6"]];
+    // donut
+    const c=$("#dn").getContext("2d"); c.clearRect(0,0,260,260);
+    const tot=parts.reduce((a,p)=>a+p[1],0)||1; let ang=-Math.PI/2;
+    parts.forEach(p=>{ const a2=ang+p[1]/tot*Math.PI*2;
+      c.beginPath();c.moveTo(130,130);c.arc(130,130,110,ang,a2);c.closePath();c.fillStyle=p[2];c.fill();ang=a2;});
+    c.beginPath();c.arc(130,130,62,0,Math.PI*2);c.fillStyle="#fff";c.fill();
+    c.fillStyle="#1E293B";c.font="900 20px Nunito, sans-serif";c.textAlign="center";
+    c.fillText("Ahorro",130,122);c.fillText(Math.round(ahorro/ing*100||0)+"%",130,148);
+    $("#lg").innerHTML=parts.map(p=>`<span><i style="background:${p[2]}"></i>${p[0]}: ${soles(p[1])}</span>`).join("");
+    // advice
+    const pctAhorro=ahorro/ing*100||0, pctDeuda=deu/ing*100||0;
+    let msg, cls;
+    if(nec+des+deu>ing){ msg="⚠️ Estás gastando más de lo que ganas. Recorta deseos o busca aumentar ingresos."; cls="var(--coral)"; }
+    else if(pctDeuda>30){ msg="🚨 Tus deudas superan el 30% de tu ingreso. Cuidado con el sobreendeudamiento."; cls="var(--coral)"; }
+    else if(pctAhorro>=20){ msg=`🌟 ¡Excelente! Ahorras ${Math.round(pctAhorro)}% de tu ingreso. Vas por muy buen camino.`; cls="var(--verde-dark)"; }
+    else if(pctAhorro>0){ msg=`👍 Ahorras ${Math.round(pctAhorro)}%. Intenta llegar al 20% recortando gastos hormiga.`; cls="var(--sol-dark)"; }
+    else{ msg="💡 No te queda nada para ahorrar. Revisa tus deseos: pequeños recortes hacen la diferencia."; cls="var(--sol-dark)"; }
+    $("#advice").innerHTML=`<b style="color:${cls}">Recomendación de FINAN</b><p style="font-weight:700;margin-top:6px;line-height:1.4">${msg}</p>`;
+    return {pctAhorro,ok:nec+des+deu<=ing};
+  }
+  ids.forEach(i=>$("#"+i).oninput=draw); draw();
+  if(fromLevel) $("#fin").onclick=()=>{
+    const r=draw(); S.salud.presupuesto=Math.min(100,60+r.pctAhorro);
+    completeLevel(id);
+    reward({emoji:"📊",title:"¡Presupuesto creado!",sub:"Ya sabes exactamente a dónde va tu dinero.",
+      xp:30,sol:15,badge:"presupuesto",then:()=>go("map")});
+  };
+}
+
+/* ---- Nivel 4: Consigue tu meta (ahorro) ---- */
+PLAY.saving=(id)=>{ buildSaving(id,true); };
+function buildSaving(id,fromLevel){
+  showChrome(!fromLevel); if(!fromLevel) setNav("sims");
+  render(`${fromLevel?`<div class="lesson-head"><button class="x" onclick="go('map')">✕</button><div class="prog"><i style="width:100%"></i></div></div>`:""}
+    <span class="tag verde">${fromLevel?'Nivel 4':'Simulador'}</span>
+    <h2 style="margin-top:8px">Consigue tu meta 🎯</h2>
+    <p class="muted" style="font-weight:700;margin:6px 0 14px">¿Qué quieres lograr? Veamos cuánto tiempo te tomará.</p>
+    <div class="card">
+      <div class="slider-row" style="margin-top:0"><label><span>🎯 Meta de ahorro</span><b class="soles" id="vMeta">${soles(3000)}</b></label>
+        <input type="range" min="300" max="20000" step="100" value="3000" id="meta"></div>
+      <div class="slider-row" style="margin-bottom:0"><label><span>🐷 Ahorro cada mes</span><b class="soles" id="vMes">${soles(300)}</b></label>
+        <input type="range" min="50" max="2000" step="50" value="300" id="mes"></div>
+    </div>
+    <div class="spacer-m"></div>
+    <div class="result-box" id="rb"></div>
+    <div class="spacer-s"></div>
+    <div>
+      <div style="display:flex;justify-content:space-between;font-weight:800;font-size:13px;margin-bottom:6px">
+        <span>Progreso simulado (mes 1)</span><span id="pct">0%</span></div>
+      <div class="prog violeta"><i id="bar" style="width:0%"></i></div>
+    </div>
+    ${fromLevel?'<div class="spacer-m"></div><button class="btn" id="fin">Empezar a ahorrar</button>':''}`);
+  function draw(){
+    const meta=+$("#meta").value, mes=+$("#mes").value;
+    $("#vMeta").textContent=soles(meta);$("#vMes").textContent=soles(mes);
+    const meses=Math.ceil(meta/mes);
+    $("#rb").innerHTML=`
+      <div class="rb-row"><span>Necesitas ahorrar</span><b class="soles">${soles(meta)}</b></div>
+      <div class="rb-row"><span>Guardando</span><b class="soles">${soles(mes)}/mes</b></div>
+      <div class="rb-row" style="border-top:1px solid #334155;margin-top:4px;padding-top:8px">
+        <span>Lo lograrás en</span><b style="color:#C4B5FD">${meses} ${meses===1?'mes':'meses'}</b></div>
+      <p style="font-weight:700;margin-top:8px;font-size:13px;color:#CBD5E1">
+        ${mes*meses>meta?`Con el último mes juntarás ${soles(mes*meses)}.`:''}
+        ${meses>36?'💡 Es una meta larga: sube un poco tu ahorro mensual para acortarla.':'🚀 ¡Muy alcanzable!'}</p>`;
+    const p=Math.min(100,Math.round(mes/meta*100));
+    $("#bar").style.width=p+"%"; $("#pct").textContent=p+"%";
+  }
+  ["meta","mes"].forEach(i=>$("#"+i).oninput=draw); draw();
+  if(fromLevel) $("#fin").onclick=()=>{
+    S.salud.ahorro=Math.min(100,S.salud.ahorro+40); S.salud.metas=Math.min(100,S.salud.metas+50);
+    completeLevel(id);
+    reward({emoji:"🐷",title:"¡Meta configurada!",sub:"Ahorrar constante es más poderoso que ahorrar mucho de golpe.",
+      xp:30,sol:15,badge:"ahorrador",then:()=>go("map")});
+  };
+}
+
+/* ---- Nivel 9: Simulador de crédito ---- */
+PLAY.credit=(id)=>{ buildCredit(id,true); };
+function buildCredit(id,fromLevel){
+  showChrome(!fromLevel); if(!fromLevel) setNav("sims");
+  // dos créditos para S/5000
+  const A={n:"Crédito A",cuota:480,plazo:12}; const B={n:"Crédito B",cuota:280,plazo:24};
+  A.total=A.cuota*A.plazo; B.total=B.cuota*B.plazo; const monto=5000;
+  A.int=A.total-monto; B.int=B.total-monto;
+  A.tcea=Math.round((A.int/monto)/(A.plazo/12)*100); B.tcea=Math.round((B.int/monto)/(B.plazo/12)*100);
+  render(`${fromLevel?`<div class="lesson-head"><button class="x" onclick="go('map')">✕</button><div class="prog"><i style="width:100%"></i></div></div>`:""}
+    <span class="tag verde">${fromLevel?'Nivel 9':'Simulador'}</span>
+    <h2 style="margin-top:8px">¿Cuál préstamo elegirías?</h2>
+    <p class="muted" style="font-weight:700;margin:6px 0 14px">Luis necesita <b>${soles(monto)}</b> para su moto. Mira solo la cuota… ¿o el costo total?</p>
+    <div class="compare">
+      <div class="credit-card" data-c="A">
+        <h3>🅰️ Crédito A</h3>
+        <div class="cc-row"><span>Cuota</span><b class="soles">${soles(A.cuota)}</b></div>
+        <div class="cc-row"><span>Plazo</span><b>${A.plazo} meses</b></div>
+        <div class="cc-row" style="color:var(--gris)"><span>Cuota más alta</span><span>💪</span></div>
+      </div>
+      <div class="credit-card" data-c="B">
+        <h3>🅱️ Crédito B</h3>
+        <div class="cc-row"><span>Cuota</span><b class="soles">${soles(B.cuota)}</b></div>
+        <div class="cc-row"><span>Plazo</span><b>${B.plazo} meses</b></div>
+        <div class="cc-row" style="color:var(--gris)"><span>Cuota más baja</span><span>😌</span></div>
+      </div>
+    </div>
+    <p class="small muted center" style="font-weight:800;margin:12px 0">Toca el que elegirías 👆</p>
+    <div id="reveal"></div>`);
+  document.querySelectorAll(".credit-card").forEach(el=>{
+    el.onclick=()=>{
+      document.querySelectorAll(".credit-card").forEach(x=>x.classList.remove("pick"));
+      el.classList.add("pick");
+      const pick=el.dataset.c;
+      $("#reveal").innerHTML=`
+        <div class="result-box">
+          <div style="text-align:center;margin-bottom:8px"><span class="tag sol">La verdad de los números</span></div>
+          <div class="rb-row"><span>🅰️ A · paga en total</span><b class="soles">${soles(A.total)}</b></div>
+          <div class="rb-row" style="color:#94A3B8"><span>Intereses A · TCEA ~${A.tcea}%</span><span class="soles">+${soles(A.int)}</span></div>
+          <div class="rb-row" style="border-top:1px solid #334155;margin-top:4px;padding-top:8px"><span>🅱️ B · paga en total</span><b class="soles">${soles(B.total)}</b></div>
+          <div class="rb-row" style="color:#94A3B8"><span>Intereses B · TCEA ~${B.tcea}%</span><span class="soles">+${soles(B.int)}</span></div>
+        </div>
+        <div class="card" style="margin-top:12px;background:${pick==='A'?'var(--verde-soft)':'var(--sol-soft)'};border-color:${pick==='A'?'var(--verde)':'var(--sol)'}">
+          <b>${pick==='A'?'🎉 ¡Buena elección!':'💡 Ojo con esto:'}</b>
+          <p style="font-weight:700;margin-top:6px;line-height:1.45">
+            El Crédito B tiene una cuota más cómoda, pero terminas pagando <b>${soles(B.total-A.total)} más</b> que con el A, por el plazo más largo.</p>
+          <p style="font-weight:800;margin-top:8px;color:var(--tinta)">📌 Una cuota más pequeña no significa un crédito más barato.</p>
+        </div>
+        ${fromLevel?'<div class="spacer-m"></div><button class="btn" id="fin">Entendí la lección</button>':''}`;
+      if(fromLevel) $("#fin").onclick=()=>{
+        S.salud.conocimiento=Math.min(100,S.salud.conocimiento+15); S.salud.deuda=Math.min(100,S.salud.deuda+30);
+        completeLevel(id);
+        reward({emoji:"🧠",title:"¡Ya sabes comparar créditos!",sub:"Siempre mira el costo total y la TCEA, no solo la cuota.",
+          xp:35,sol:18,badge:"credito",then:()=>go("map")});
+      };
+    };
+  });
+}
+
+/* ---- Nivel 12: ¿Estafa o Real? ---- */
+PLAY.scam=(id)=>{
+  showChrome(false);
+  const cases=[
+    {txt:"📱 SMS: «BCP: Tu cuenta será BLOQUEADA hoy. Ingresa YA a bcp-seguro-peru.info y valida tus datos.»",
+     estafa:true, why:"Urgencia + enlace raro (no es el dominio oficial) + pide validar datos. Clásico phishing."},
+    {txt:"🏦 Notificación en tu app oficial del banco: «Realizaste un pago de S/ 45.00 en Metro.»",
+     estafa:false, why:"Es una notificación normal dentro de tu app oficial. No pide datos ni contraseñas."},
+    {txt:"☎️ Llamada: «Soy de su banco. Para un premio, deme su clave de 6 dígitos y el código que le llegó por SMS.»",
+     estafa:true, why:"Ningún banco pide tu clave ni el código SMS por teléfono. Nunca los compartas."},
+    {txt:"💬 WhatsApp de un número desconocido: «Hola tío, cambié de número. Necesito que me deposites S/ 500 urgente 🙏»",
+     estafa:true, why:"Suplantación de identidad. Verifica llamando al número que ya conocías antes de enviar dinero."},
+    {txt:"📧 Correo de Yape con tu nombre real: «Tu comprobante del envío a Ana G. está listo» (tú sí lo enviaste).",
+     estafa:false, why:"Coincide con una acción que tú hiciste y usa tus datos reales. Aun así: verifica siempre en la app."},
+  ];
+  let i=0, aciertos=0;
+  const paint=()=>{
+    const c=cases[i];
+    render(`<div class="lesson-head"><button class="x" onclick="go('map')">✕</button>
+        <div class="prog"><i style="width:${(i/cases.length)*100}%"></i></div>
+        <span class="small muted" style="font-weight:900">${i+1}/${cases.length}</span></div>
+      <span class="tag" style="background:var(--coral-soft);color:var(--coral)">🚨 ¿Estafa o Real?</span>
+      <div class="spacer-s"></div>
+      <div class="card" style="font-weight:700;font-size:15px;line-height:1.5;background:var(--nube-2)">${c.txt}</div>
+      <div class="spacer-m"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn sol" id="est" style="box-shadow:0 4px 0 var(--coral-dark,#B91C1C);background:var(--coral)">🚨 Es ESTAFA</button>
+        <button class="btn" id="real">✅ Es REAL</button>
+      </div>`);
+    const answer=(guess)=>{
+      const ok = guess===c.estafa;
+      if(ok){ aciertos++; S.salud.seguridad=Math.min(100,S.salud.seguridad+20); }
+      else{ S.vidas=Math.max(0,S.vidas-1); updateTop(); }
+      showFeedback(ok, `<b>${c.estafa?'Era una ESTAFA.':'Era REAL.'}</b> ${c.why}`, ()=>{
+        i++; i<cases.length?paint():finish();
+      });
+    };
+    $("#est").onclick=()=>answer(true);
+    $("#real").onclick=()=>answer(false);
+  };
+  const finish=()=>{
+    completeLevel(id);
+    const perfecto=aciertos===cases.length;
+    reward({emoji:perfecto?"🛡️":"🔎",title:perfecto?"¡Detector experto!":"¡Buen ojo!",
+      sub:`Acertaste ${aciertos} de ${cases.length}. Ante la duda: nunca compartas tus claves y verifica por el canal oficial.`,
+      xp:35,sol:18,badge:aciertos>=4?"anti_estafa":null,then:()=>go("map")});
+  };
+  paint();
+};
+
+/* Cabecera reutilizable de lección */
+function lessonHead(pct){
+  return `<div class="lesson-head">
+    <button class="x" onclick="if(confirm('¿Salir del nivel? Perderás el avance de esta sesión.'))go('map')">✕</button>
+    <div class="prog"><i style="width:${pct}%"></i></div></div>`;
+}
+
+/* Motor genérico de quiz con escenas + feedback (para bancos, celular, seguridad) */
+function runQuiz(id, cfg){
+  showChrome(false);
+  let i=0, aciertos=0;
+  const paint=()=>{
+    const c=cfg.cases[i];
+    render(lessonHead((i/cfg.cases.length)*100)+
+      `<span class="tag" style="background:${cfg.tagBg};color:${cfg.tagColor}">${cfg.tag}</span>
+      <span class="small muted" style="font-weight:900;float:right">${i+1}/${cfg.cases.length}</span>
+      <div class="spacer-s"></div>
+      ${c.scene?`<div class="card" style="background:var(--nube-2);font-weight:700;font-size:14.5px;line-height:1.5">${c.scene}</div><div class="spacer-s"></div>`:""}
+      <h2>${c.q}</h2>
+      <div class="spacer-m"></div><div id="opts"></div>`);
+    const box=$("#opts");
+    c.opts.forEach((o,k)=>{
+      const b=document.createElement("button");
+      b.className="opt"; b.innerHTML=`<span class="lead">${"ABCD"[k]}</span><span>${o[0]}</span>`;
+      b.onclick=()=>{
+        [...box.children].forEach(x=>x.disabled=true);
+        if(o[1]){ b.classList.add("correct"); aciertos++; }
+        else{
+          b.classList.add("wrong");
+          const ci=c.opts.findIndex(z=>z[1]); if(ci>=0) box.children[ci].classList.add("correct");
+          S.vidas=Math.max(0,S.vidas-1); updateTop();
+        }
+        showFeedback(o[1], o[2], ()=>{ i++; i<cfg.cases.length?paint():finish(); });
+      };
+      box.appendChild(b);
+    });
+  };
+  const finish=()=>{
+    if(cfg.health) cfg.health(aciertos, cfg.cases.length);
+    completeLevel(id);
+    const gotBadge = cfg.badgeIf ? cfg.badgeIf(aciertos,cfg.cases.length) : true;
+    reward({emoji:cfg.emoji, title:cfg.finishTitle,
+      sub:cfg.finishSub(aciertos,cfg.cases.length),
+      xp:cfg.xp||30, sol:cfg.sol||15, badge:gotBadge?cfg.badge:null, then:()=>go("map")});
+  };
+  paint();
+}
+
+/* ---- Nivel 5: Fondo de emergencia ---- */
+PLAY.fondo=(id)=>{
+  showChrome(false);
+  let step=0;
+  const scenes=[
+    ()=>`<div class="scene"><div class="avatar">🧑🏽</div>
+        <div class="bubble">Tienes <b>${soles(1500)}</b> ahorrados. Todo va bien… hasta que un día pasa algo inesperado. 😰</div></div>
+      <h2>Un imprevisto llega</h2>
+      <p class="muted" style="font-weight:700;margin-top:6px">A todos nos pasa. Veamos cómo lo enfrentas.</p>`,
+    ()=>`<div class="card" style="background:var(--coral-soft);border-color:var(--coral)">
+        <div style="font-size:40px">🚗💥</div>
+        <b style="font-size:16px;color:var(--coral)">Se malogró tu moto de trabajo</b>
+        <p style="font-weight:700;margin-top:6px">La reparación cuesta <b>${soles(800)}</b> y la necesitas para generar ingresos. ¿Qué haces?</p></div>`,
+  ];
+  const decide=()=>{
+    render(lessonHead(50)+`<span class="tag" style="background:var(--coral-soft);color:var(--coral)">Tú decides</span>
+      <div class="spacer-s"></div><h2>¿Cómo afrontas los ${soles(800)}?</h2><div class="spacer-m"></div><div id="opts"></div>`);
+    const opts=[
+      ["Uso mi ahorro de emergencia y repongo poco a poco",true,"¡Exacto! Para esto sirve el fondo de emergencia: cubrir imprevistos sin endeudarte."],
+      ["Pido un préstamo rápido con intereses altos",false,"Endeudarte para una emergencia que ya podías cubrir te cuesta caro. Primero, tu fondo."],
+      ["No lo arreglo y dejo de trabajar unos días",false,"Perder ingresos por no usar tu ahorro te perjudica más. El fondo existe justo para esto."],
+    ];
+    const box=$("#opts");
+    opts.forEach((o,k)=>{
+      const b=document.createElement("button");
+      b.className="opt"; b.innerHTML=`<span class="lead">${"ABC"[k]}</span><span>${o[0]}</span>`;
+      b.onclick=()=>{[...box.children].forEach(c=>c.disabled=true);
+        b.classList.add(o[1]?"correct":"wrong"); if(!o[1]) box.children[0].classList.add("correct");
+        showFeedback(o[1],o[2],()=>{step=3;paint();});};
+      box.appendChild(b);
+    });
+  };
+  const explain=()=>{
+    render(lessonHead(75)+`<div style="font-size:52px;text-align:center">🛟</div>
+      <span class="tag verde">Concepto</span><h2 style="margin-top:8px">El fondo de emergencia</h2>
+      <div class="spacer-s"></div>
+      <p style="font-weight:700;line-height:1.5">Es un ahorro guardado <b>solo para imprevistos</b>: salud, reparaciones o quedarte sin ingresos.</p>
+      <div class="card" style="margin-top:14px"><b>¿Cuánto necesito? 🎯</b>
+        <p style="font-weight:700;margin-top:6px">Lo ideal: de <b>3 a 6 meses</b> de tus gastos. No se toca salvo una verdadera emergencia.</p></div>
+      <div class="spacer-l"></div><button class="btn" id="next">Calcular el mío</button>`);
+    $("#next").onclick=()=>{step=4;paint();};
+  };
+  const challenge=()=>{
+    render(lessonHead(90)+`<span class="tag violeta">Mini reto</span>
+      <h2 style="margin-top:8px">¿Cuánto fondo necesitas?</h2>
+      <p class="muted" style="font-weight:700;margin:6px 0 12px">Ajusta tus gastos mensuales. Te mostramos tu meta de fondo.</p>
+      <div class="card"><div class="slider-row" style="margin:0">
+        <label><span>💸 Mis gastos al mes</span><b class="soles" id="vg">${soles(1000)}</b></label>
+        <input type="range" min="300" max="4000" step="50" value="1000" id="g"></div></div>
+      <div class="spacer-m"></div>
+      <div class="kpi">
+        <div class="k"><b class="soles" id="min">S/ 3,000</b><span>Fondo mínimo (3 meses)</span></div>
+        <div class="k"><b class="soles" id="ideal">S/ 6,000</b><span>Fondo ideal (6 meses)</span></div>
+      </div>
+      <div class="spacer-m"></div><button class="btn" id="fin">Entendido</button>`);
+    const upd=()=>{const g=+$("#g").value;$("#vg").textContent=soles(g);
+      $("#min").textContent=soles(g*3);$("#ideal").textContent=soles(g*6);};
+    $("#g").oninput=upd;upd();
+    $("#fin").onclick=()=>{S.salud.fondo=Math.min(100,S.salud.fondo+60);
+      reward({emoji:"🛟",title:"¡Fondo blindado!",sub:"Un fondo de emergencia es tu escudo contra las deudas.",
+        xp:30,sol:15,badge:"fondo",then:()=>go("map")});};
+  };
+  function paint(){
+    if(step<2){ render(lessonHead((step/6)*100)+scenes[step]()+`<div class="spacer-l"></div><button class="btn" id="next">Continuar</button>`);
+      $("#next").onclick=()=>{step++;paint();}; }
+    else if(step===2){ decide(); }
+    else if(step===3){ explain(); }
+    else { challenge(); }
+  }
+  paint();
+};
+
+/* ---- Nivel 6: Entiendo los bancos ---- */
+PLAY.bancos=(id)=>{
+  runQuiz(id,{
+    tag:"🏦 Nivel 6", tagBg:"var(--verde-soft)", tagColor:"var(--verde-dark)",
+    emoji:"🏦", badge:"banquero",
+    cases:[
+      {scene:"🐷 <b>Cuenta de ahorro:</b> guarda tu dinero de forma segura y puedes ganar un pequeño interés. Ideal para tu fondo y metas.",
+       q:"Quieres guardar dinero y que esté seguro, retirándolo de vez en cuando. ¿Qué usas?",
+       opts:[["Una cuenta de ahorro",true,"Correcto. Es segura, disponible y hasta te da un pequeño interés."],
+             ["Una tarjeta de crédito",false,"La tarjeta de crédito es dinero prestado, no para guardar el tuyo."],
+             ["Un préstamo",false,"Un préstamo es dinero que pides y devuelves con intereses."]]},
+      {scene:"💳 <b>Tarjeta de débito:</b> usa el dinero que TÚ ya tienes en tu cuenta. 💳 <b>Tarjeta de crédito:</b> usa dinero del banco que debes devolver.",
+       q:"Pagas con tu tarjeta y el dinero sale al instante de tu propia cuenta. ¿Cuál es?",
+       opts:[["Tarjeta de crédito",false,"Con la de crédito usas dinero del banco, no el tuyo."],
+             ["Tarjeta de débito",true,"Así es. La débito usa tu propio dinero, sin deuda."],
+             ["Ninguna, es un préstamo",false,"No: pagar con tarjeta al instante desde tu cuenta es débito."]]},
+      {scene:"💡 Los bancos cobran <b>comisiones</b> por algunos servicios y pagan <b>intereses</b> por tus ahorros.",
+       q:"Antes de abrir una cuenta, ¿en qué te conviene fijarte?",
+       opts:[["Solo en el color de la tarjeta",false,"Eso no afecta tu dinero. Mira las condiciones."],
+             ["En las comisiones de mantenimiento y retiro",true,"¡Muy bien! Comparar comisiones evita pagar de más."],
+             ["En que sea el banco más grande",false,"El tamaño no garantiza las mejores condiciones para ti."]]},
+    ],
+    health:(a)=>{S.salud.conocimiento=Math.min(100,S.salud.conocimiento+15);},
+    finishTitle:"¡Ya conoces tus bancos!",
+    finishSub:(a,t)=>`Acertaste ${a} de ${t}. Elegir el producto correcto te ahorra dinero.`,
+  });
+};
+
+/* ---- Nivel 7: Mi dinero en el celular ---- */
+PLAY.celular=(id)=>{
+  runQuiz(id,{
+    tag:"📱 Nivel 7", tagBg:"var(--azul-soft)", tagColor:"#1D4ED8",
+    emoji:"📱", badge:"digital",
+    cases:[
+      {scene:"📲 Vas a pagar en una tienda con Yape/Plin escaneando un QR.",
+       q:"Antes de confirmar el pago con QR, ¿qué revisas?",
+       opts:[["El nombre del negocio y el monto exacto",true,"¡Correcto! Verificar destinatario y monto evita pagos equivocados."],
+             ["Nada, confirmo rápido para no demorar",false,"La prisa causa errores. Siempre revisa a quién y cuánto pagas."],
+             ["Aumento el monto por si acaso",false,"Nunca pagues de más: confirma el monto exacto."]]},
+      {scene:"📩 Te llega un SMS: «Tu cuenta será BLOQUEADA. Ingresa a este enlace y confirma tu clave.»",
+       q:"¿Qué haces?",
+       opts:[["Ingreso al enlace y pongo mi clave",false,"¡Nunca! Es phishing. Los bancos no piden claves por enlaces."],
+             ["Comparto mi clave para confirmar",false,"Jamás compartas tu clave. Nadie legítimo te la pedirá."],
+             ["Ignoro el enlace y verifico en la app oficial",true,"¡Exacto! Ante la duda, usa siempre el canal oficial del banco."]]},
+      {scene:"🔐 Usas banca móvil en tu celular a diario.",
+       q:"¿Cuál es un buen hábito de seguridad digital?",
+       opts:[["Guardar mi clave en una nota del celular",false,"Si pierdes el celular, regalas tu clave. Nunca la anotes sin protección."],
+             ["Usar clave, huella y no conectarme en wifi público",true,"¡Muy bien! Doble protección y evitar wifi abierto te blindan."],
+             ["Compartir mi clave con un familiar por si acaso",false,"Tu clave es solo tuya. Compartirla multiplica el riesgo."]]},
+    ],
+    health:(a)=>{S.salud.seguridad=Math.min(100,S.salud.seguridad+20);},
+    finishTitle:"¡Dinero digital seguro!",
+    finishSub:(a,t)=>`Acertaste ${a} de ${t}. El celular es cómodo… y seguro si tomas precauciones.`,
+  });
+};
+
+/* ---- Nivel 8: Aprendo a usar tarjetas (pago total vs mínimo) ---- */
+PLAY.tarjetas=(id)=>{
+  showChrome(false);
+  let step=0;
+  const deuda=2000, tasaMes=0.08; // 8% mensual aprox tarjetas Perú
+  const scene=()=>`<div class="scene"><div class="avatar">💳</div>
+      <div class="bubble">Usaste <b>${soles(deuda)}</b> de tu tarjeta de crédito este mes. Llega la fecha de pago… 🗓️</div></div>
+    <h2>Pago total o pago mínimo</h2>
+    <p class="muted" style="font-weight:700;margin-top:6px">La decisión más importante con una tarjeta. Veamos la diferencia.</p>`;
+  const decide=()=>{
+    render(lessonHead(40)+`<span class="tag sol">Tú decides</span><div class="spacer-s"></div>
+      <h2>¿Cómo pagas los ${soles(deuda)}?</h2>
+      <p class="muted" style="font-weight:700;margin:6px 0 16px">El pago mínimo es solo ${soles(Math.round(deuda*0.05))} este mes. Tentador, ¿no?</p>
+      <div class="compare">
+        <button class="credit-card" data-p="total" style="text-align:left">
+          <h3>✅ Pago TOTAL</h3>
+          <div class="cc-row"><span>Pagas hoy</span><b class="soles">${soles(deuda)}</b></div>
+          <div class="cc-row" style="color:var(--gris)"><span>Intereses</span><b>S/ 0</b></div></button>
+        <button class="credit-card" data-p="min" style="text-align:left">
+          <h3>⚠️ Pago MÍNIMO</h3>
+          <div class="cc-row"><span>Pagas hoy</span><b class="soles">${soles(Math.round(deuda*0.05))}</b></div>
+          <div class="cc-row" style="color:var(--gris)"><span>Intereses</span><b>❓</b></div></button>
+      </div>
+      <p class="small muted center" style="font-weight:800;margin-top:12px">Toca tu elección 👆</p><div id="rev"></div>`);
+    document.querySelectorAll(".credit-card").forEach(el=>{
+      el.onclick=()=>{
+        document.querySelectorAll(".credit-card").forEach(x=>x.classList.remove("pick"));
+        el.classList.add("pick");
+        const p=el.dataset.p;
+        // simular mínimo: cuánto tarda y cuánto paga
+        let saldo=deuda, meses=0, pagado=0;
+        while(saldo>1 && meses<200){ const int=saldo*tasaMes; const cuota=Math.max(deuda*0.05,int+20); const ab=Math.min(cuota,saldo+int); pagado+=ab; saldo=saldo+int-ab; meses++; }
+        const extra=Math.round(pagado-deuda);
+        $("#rev").innerHTML=`
+          <div class="result-box" style="margin-top:8px">
+            ${p==="total"
+              ? `<div class="center"><div style="font-size:34px">🎉</div><b style="font-size:16px">¡Elegiste el pago total!</b>
+                 <p style="font-weight:700;margin-top:6px;color:#CBD5E1">Pagas ${soles(deuda)} y <b style="color:#6EE7B7">S/ 0 de intereses</b>. Tu tarjeta te sale gratis.</p></div>`
+              : `<div class="center"><div style="font-size:34px">😰</div><b style="font-size:16px">El pago mínimo tiene trampa</b></div>
+                 <div class="rb-row" style="margin-top:10px"><span>Tardarías en pagar</span><b style="color:#FCA5A5">${meses} meses</b></div>
+                 <div class="rb-row"><span>Pagarías en total</span><b class="soles">${soles(Math.round(pagado))}</b></div>
+                 <div class="rb-row"><span>Intereses de más</span><b class="soles" style="color:#FCA5A5">+${soles(extra)}</b></div>`}
+          </div>
+          <div class="card" style="margin-top:12px;background:var(--sol-soft);border-color:var(--sol)">
+            <b>📌 Regla de oro</b><p style="font-weight:700;margin-top:6px">Paga siempre el <b>total</b> antes de la fecha de pago. El pago mínimo hace que la deuda crezca por los intereses.</p></div>
+          <div class="spacer-m"></div><button class="btn" id="fin">Entendí la lección</button>`;
+        $("#fin").onclick=()=>{S.salud.deuda=Math.min(100,S.salud.deuda+30);S.salud.conocimiento=Math.min(100,S.salud.conocimiento+10);
+          reward({emoji:"💳",title:"¡Tarjeta bajo control!",sub:"Bien usada, la tarjeta es una herramienta; mal usada, una trampa.",
+            xp:30,sol:15,badge:"tarjeta",then:()=>go("map")});};
+      };
+    });
+  };
+  function paint(){
+    if(step===0){render(lessonHead(0)+scene()+`<div class="spacer-l"></div><button class="btn" id="next">Continuar</button>`);
+      $("#next").onclick=()=>{step=1;paint();};}
+    else decide();
+  }
+  paint();
+};
+
+/* ---- Nivel 10: Evito el sobreendeudamiento ---- */
+PLAY.deuda=(id)=>{
+  showChrome(false);
+  const ingreso=2000;
+  const ofertas=[
+    {n:"Préstamo para TV nueva",cuota:300,emoji:"📺",buena:false},
+    {n:"Tarjeta de tienda",cuota:250,emoji:"🛍️",buena:false},
+    {n:"Crédito para tu negocio",cuota:400,emoji:"🏪",buena:true},
+    {n:"Préstamo para vacaciones",cuota:350,emoji:"✈️",buena:false},
+  ];
+  let picked=new Set();
+  const paint=()=>{
+    const comprometido=[...picked].reduce((a,i)=>a+ofertas[i].cuota,0);
+    const pct=Math.round(comprometido/ingreso*100);
+    const alerta=pct>30;
+    render(lessonHead(60)+`<span class="tag" style="background:var(--coral-soft);color:var(--coral)">⚠️ Nivel 10</span>
+      <h2 style="margin-top:8px">¿Cuánto puedes deber?</h2>
+      <p class="muted" style="font-weight:700;margin:6px 0 12px">Ganas <b>${soles(ingreso)}</b> al mes. Te ofrecen varios créditos. Acepta solo los que puedas pagar sin ahogarte.</p>
+      <div id="ofs"></div>
+      <div class="result-box">
+        <div class="rb-row"><span>Cuotas comprometidas</span><b class="soles">${soles(comprometido)}</b></div>
+        <div class="rb-row"><span>% de tu ingreso</span><b style="color:${alerta?'#FCA5A5':'#6EE7B7'}">${pct}%</b></div>
+        <div class="prog ${alerta?'':''}" style="margin-top:8px;background:#334155"><i style="width:${Math.min(100,pct)}%;background:${alerta?'var(--coral)':'var(--verde)'}"></i></div>
+        <p style="font-weight:700;margin-top:8px;font-size:13px;color:${alerta?'#FCA5A5':'#CBD5E1'}">
+          ${alerta?'🚨 Tus cuotas superan el 30% de tu ingreso. Riesgo de sobreendeudamiento.':'✅ Tu nivel de deuda es saludable (regla: no más del 30%).'}</p>
+      </div>
+      <div class="spacer-m"></div><button class="btn" id="fin">Confirmar mis decisiones</button>`);
+    const box=$("#ofs");
+    ofertas.forEach((o,k)=>{
+      const on=picked.has(k);
+      const c=document.createElement("button");
+      c.className="opt"; if(on)c.classList.add("correct");
+      c.innerHTML=`<span class="lead">${o.emoji}</span><span style="flex:1">${o.n}<br><small class="muted" style="font-weight:700">Cuota: ${soles(o.cuota)}/mes</small></span><b>${on?'✓ Aceptado':'Aceptar'}</b>`;
+      c.onclick=()=>{on?picked.delete(k):picked.add(k);paint();};
+      box.appendChild(c);
+    });
+    $("#fin").onclick=()=>{
+      const comprometido=[...picked].reduce((a,i)=>a+ofertas[i].cuota,0);
+      const pct=comprometido/ingreso*100;
+      S.salud.deuda=Math.min(100, pct<=30?90:Math.max(20,90-pct));
+      const bien=pct<=30;
+      reward({emoji:bien?"⚖️":"😅",title:bien?"¡Deuda saludable!":"¡Cuidado con endeudarte!",
+        sub:bien?`Comprometiste ${Math.round(pct)}% de tu ingreso. Tienes capacidad de pago.`:`Comprometiste ${Math.round(pct)}%. Recuerda: la capacidad de pago es no pasar del 30%.`,
+        xp:30,sol:15,badge:bien?"equilibrio":null,then:()=>go("map")});
+    };
+  };
+  paint();
+};
+
+/* ---- Nivel 11: Protejo mi dinero (buenos hábitos) ---- */
+PLAY.seguridad=(id)=>{
+  runQuiz(id,{
+    tag:"🛡️ Nivel 11", tagBg:"var(--violeta-soft)", tagColor:"#6D28D9",
+    emoji:"🛡️", badge:"guardian", badgeIf:(a,t)=>a>=t-1,
+    cases:[
+      {q:"¿Cuál es la MEJOR clave para tu banca?",
+       opts:[["Tu fecha de nacimiento",false,"Es lo primero que un estafador prueba. Evita datos personales."],
+             ["1234 o 0000, fácil de recordar",false,"Las claves obvias son las más inseguras."],
+             ["Una combinación única que solo tú conoces",true,"¡Correcto! Única, difícil de adivinar y que no compartes con nadie."]]},
+      {q:"Un supuesto 'agente del banco' te llama y pide tu clave y el código del SMS. ¿Qué haces?",
+       opts:[["Se los doy, si llama del banco será verdad",false,"Ningún banco pide claves ni códigos por teléfono. Es fraude."],
+             ["Cuelgo y llamo al número oficial del banco",true,"¡Exacto! Verifica siempre por el canal oficial, nunca des tus claves."],
+             ["Le doy solo el código del SMS",false,"Ese código es la llave de tu cuenta. Nunca lo compartas."]]},
+      {q:"¿Cuál es una buena práctica para proteger tu dinero?",
+       opts:[["Revisar mis movimientos con frecuencia",true,"¡Muy bien! Detectar cargos raros a tiempo evita pérdidas mayores."],
+             ["Usar la misma clave para todo",false,"Si roban una, roban todas. Usa claves distintas."],
+             ["Guardar la tarjeta con el PIN anotado detrás",false,"Si la pierdes, entregas todo. Nunca anotes el PIN con la tarjeta."]]},
+      {q:"Ves un cargo que no reconoces en tu cuenta. ¿Qué haces primero?",
+       opts:[["Espero a ver si se corrige solo",false,"Actuar rápido es clave. No esperes."],
+             ["Contacto a mi banco por el canal oficial y lo reporto",true,"¡Correcto! Reportar de inmediato protege tu dinero."],
+             ["Publico en redes pidiendo ayuda",false,"Exponer tus datos empeora el riesgo. Ve directo al banco."]]},
+    ],
+    health:(a)=>{S.salud.seguridad=Math.min(100,S.salud.seguridad+25);},
+    finishTitle:"¡Guardián de tu dinero!",
+    finishSub:(a,t)=>`Acertaste ${a} de ${t}. Tus claves y datos son tu tesoro: protégelos siempre.`,
+  });
+};
+
+/* ---- Nivel 13: Mi primera inversión (interés compuesto) ---- */
+PLAY.inversion=(id)=>{
+  showChrome(false);
+  let step=0;
+  const intro=()=>`<div style="font-size:52px;text-align:center">📈</div>
+    <span class="tag verde">Nivel 13</span><h2 style="margin-top:8px">Ahorrar vs. Invertir</h2>
+    <div class="spacer-s"></div>
+    <div class="card"><b>🐷 Ahorrar</b><p style="font-weight:700;margin-top:4px">Guardas tu dinero seguro. No crece (o casi).</p></div>
+    <div class="card"><b>📈 Invertir</b><p style="font-weight:700;margin-top:4px">Pones tu dinero a <b>crecer</b> asumiendo cierto <b>riesgo</b>: puede subir o bajar.</p></div>
+    <div class="card" style="background:var(--sol-soft);border-color:var(--sol)"><b>⚖️ Regla de oro</b>
+      <p style="font-weight:700;margin-top:4px">Toda inversión tiene algún riesgo. Primero arma tu fondo de emergencia, luego invierte lo que no necesitas pronto.</p></div>`;
+  const sim=()=>{
+    render(lessonHead(70)+`<span class="tag verde">El poder del interés compuesto</span>
+      <h2 style="margin-top:8px">Mira crecer ${soles(1000)}</h2>
+      <p class="muted" style="font-weight:700;margin:6px 0 12px">Inviertes una vez y lo dejas crecer. El interés genera más interés. 🪄</p>
+      <div class="card"><div class="slider-row" style="margin:0 0 14px">
+          <label><span>📅 Años invertido</span><b id="vy">10 años</b></label>
+          <input type="range" min="1" max="30" step="1" value="10" id="y"></div>
+        <div class="slider-row" style="margin:0">
+          <label><span>📊 Rentabilidad anual</span><b id="vr">8%</b></label>
+          <input type="range" min="2" max="15" step="1" value="8" id="r"></div></div>
+      <div class="spacer-s"></div>
+      <canvas id="cc" width="640" height="300" style="width:100%;height:auto;background:var(--nube-2);border-radius:14px"></canvas>
+      <div class="result-box" style="margin-top:10px">
+        <div class="rb-row"><span>Invertiste</span><b class="soles">${soles(1000)}</b></div>
+        <div class="rb-row"><span>Se convirtió en</span><b class="soles big" id="fin-val" style="color:#6EE7B7">S/ 0</b></div>
+        <div class="rb-row"><span>Ganancia</span><b class="soles" id="gan" style="color:#C4B5FD">S/ 0</b></div>
+      </div>
+      <div class="spacer-m"></div><button class="btn" id="ok">¡Increíble, entendí!</button>`);
+    const draw=()=>{
+      const y=+$("#y").value, r=+$("#r").value/100;
+      $("#vy").textContent=y+(y===1?" año":" años"); $("#vr").textContent=(r*100)+"%";
+      const vals=[]; for(let t=0;t<=y;t++) vals.push(1000*Math.pow(1+r,t));
+      const fin=vals[vals.length-1];
+      $("#fin-val").textContent=soles(Math.round(fin));
+      $("#gan").textContent="+"+soles(Math.round(fin-1000));
+      // gráfico de barras
+      const cv=$("#cc"), c=cv.getContext("2d"); c.clearRect(0,0,640,300);
+      const max=fin, pad=30, bw=(640-pad*2)/vals.length;
+      vals.forEach((v,t)=>{
+        const h=(v/max)*(300-pad*2);
+        const x=pad+t*bw, yy=300-pad-h;
+        c.fillStyle = t===vals.length-1? "#10B981" : "#A7F3D0";
+        c.fillRect(x+2,yy,bw-4,h);
+      });
+      c.strokeStyle="#CBD5E1";c.beginPath();c.moveTo(pad,300-pad);c.lineTo(640-pad,300-pad);c.stroke();
+      c.fillStyle="#64748B";c.font="600 16px Nunito, sans-serif";
+      c.fillText("Año 0",pad,300-8); c.textAlign="right"; c.fillText("Año "+y,640-pad,300-8); c.textAlign="left";
+    };
+    ["y","r"].forEach(i=>$("#"+i).oninput=draw); draw();
+    $("#ok").onclick=()=>{S.salud.conocimiento=Math.min(100,S.salud.conocimiento+15);
+      reward({emoji:"📈",title:"¡Inversor principiante!",sub:"El interés compuesto premia al que empieza temprano y es paciente.",
+        xp:35,sol:18,badge:"inversor",then:()=>go("map")});};
+  };
+  function paint(){
+    if(step===0){render(lessonHead(30)+intro()+`<div class="spacer-l"></div><button class="btn" id="next">Ver un ejemplo</button>`);
+      $("#next").onclick=()=>{step=1;paint();};}
+    else sim();
+  }
+  paint();
+};
+
+/* ---- Nivel 14: Cumplo mis metas ---- */
+PLAY.metas=(id)=>{
+  showChrome(false);
+  let step=0, meta=null;
+  const opciones=[
+    {e:"🎓",n:"Estudios",m:5000},{e:"🚗",n:"Vehículo",m:12000},
+    {e:"🏠",n:"Inicial de vivienda",m:20000},{e:"✈️",n:"Un viaje",m:3000},
+    {e:"💻",n:"Computadora",m:3500},{e:"👨‍👩‍👧",n:"Meta familiar",m:6000},
+  ];
+  const pick=()=>{
+    render(lessonHead(30)+`<span class="tag verde">Nivel 14</span>
+      <h2 style="margin-top:8px">¿Cuál es tu meta?</h2>
+      <p class="muted" style="font-weight:700;margin:6px 0 14px">Elige un sueño. Vamos a convertirlo en un plan con números.</p>
+      <div id="grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>`);
+    const grid=$("#grid");
+    opciones.forEach(o=>{
+      const b=document.createElement("button");
+      b.className="opt"; b.style.flexDirection="column"; b.style.textAlign="center"; b.style.padding="18px 10px";
+      b.innerHTML=`<span style="font-size:34px">${o.e}</span><span style="margin-top:6px">${o.n}</span><small class="muted" style="font-weight:700">${soles(o.m)}</small>`;
+      b.onclick=()=>{meta=o;step=1;paint();};
+      grid.appendChild(b);
+    });
+  };
+  const plan=()=>{
+    render(lessonHead(70)+`<div class="center"><div style="font-size:48px">${meta.e}</div>
+        <h2>Meta: ${meta.n}</h2><span class="tag sol">${soles(meta.m)}</span></div>
+      <div class="spacer-m"></div>
+      <div class="card"><div class="slider-row" style="margin:0">
+        <label><span>🐷 Ahorro cada mes</span><b class="soles" id="vm">${soles(300)}</b></label>
+        <input type="range" min="50" max="2000" step="50" value="300" id="m"></div></div>
+      <div class="spacer-m"></div>
+      <div class="result-box" id="rb"></div>
+      <div class="spacer-s"></div>
+      <div><div style="display:flex;justify-content:space-between;font-weight:800;font-size:13px;margin-bottom:6px">
+        <span>Avance del primer mes</span><span id="pct">0%</span></div>
+        <div class="prog violeta"><i id="bar" style="width:0%"></i></div></div>
+      <div class="spacer-m"></div><button class="btn" id="fin">Crear mi meta</button>`);
+    const draw=()=>{const m=+$("#m").value;$("#vm").textContent=soles(m);
+      const meses=Math.ceil(meta.m/m);
+      $("#rb").innerHTML=`<div class="rb-row"><span>Meta</span><b class="soles">${soles(meta.m)}</b></div>
+        <div class="rb-row"><span>Ahorrando</span><b class="soles">${soles(m)}/mes</b></div>
+        <div class="rb-row" style="border-top:1px solid #334155;margin-top:4px;padding-top:8px"><span>La logras en</span><b style="color:#C4B5FD">${meses} ${meses===1?'mes':'meses'}</b></div>
+        ${meses>48?'<p style="font-weight:700;margin-top:8px;font-size:13px;color:#FCA5A5">💡 Es una meta larga. Sube tu ahorro mensual para acortarla.</p>':'<p style="font-weight:700;margin-top:8px;font-size:13px;color:#6EE7B7">🚀 ¡Plan realista! La constancia hace la diferencia.</p>'}`;
+      const p=Math.min(100,Math.round(m/meta.m*100));$("#bar").style.width=p+"%";$("#pct").textContent=p+"%";};
+    $("#m").oninput=draw;draw();
+    $("#fin").onclick=()=>{S.salud.metas=Math.min(100,S.salud.metas+60);S.salud.ahorro=Math.min(100,S.salud.ahorro+20);
+      reward({emoji:meta.e,title:"¡Meta creada!",sub:`Tu sueño «${meta.n}» ahora es un plan con fecha. ¡A por él!`,
+        xp:35,sol:18,badge:"metas",then:()=>go("map")});};
+  };
+  function paint(){ step===0?pick():plan(); }
+  paint();
+};
+
+/* ================= SIMULADORES (pestaña) ================= */
+ROUTES.sims=()=>{
+  showChrome(true); setNav("sims");
+  render(`<h2>Simuladores</h2>
+    <p class="muted" style="font-weight:700;margin:6px 0 16px">Herramientas para decidir con tus propios números. Practica cuando quieras.</p>
+    <div class="card sim-pick" data-s="budget" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="font-size:36px">📊</div>
+        <div style="flex:1"><h3>Presupuesto personal</h3><p class="small muted" style="font-weight:700">Organiza ingresos, gastos y ahorro</p></div>
+        <div style="font-size:22px;color:var(--gris-soft)">›</div></div></div>
+    <div class="card sim-pick" data-s="saving" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="font-size:36px">🐷</div>
+        <div style="flex:1"><h3>Meta de ahorro</h3><p class="small muted" style="font-weight:700">¿Cuánto y por cuánto tiempo ahorrar?</p></div>
+        <div style="font-size:22px;color:var(--gris-soft)">›</div></div></div>
+    <div class="card sim-pick" data-s="credit" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="font-size:36px">💵</div>
+        <div style="flex:1"><h3>Comparador de crédito</h3><p class="small muted" style="font-weight:700">Mira el costo total y la TCEA, no solo la cuota</p></div>
+        <div style="font-size:22px;color:var(--gris-soft)">›</div></div></div>`);
+  document.querySelectorAll(".sim-pick").forEach(el=>{
+    el.onclick=()=>{ const s=el.dataset.s;
+      if(s==="budget")buildBudget(null,false);
+      if(s==="saving")buildSaving(null,false);
+      if(s==="credit")buildCredit(null,false);
+    };
+  });
+};
+
+/* ================= ASISTENTE FINAN ================= */
+const FINAN_QA=[
+  {k:["tcea","costo del cr","cuánto pago","interes"], q:"¿Qué es la TCEA?",
+   a:"La TCEA es el <b>costo total real</b> de un crédito en un año: junta la tasa de interés + comisiones + seguros. 🧠 Sirve para comparar préstamos de forma justa. Ejemplo: entre dos créditos de S/ 5,000, elige el de <b>menor TCEA</b>, aunque su cuota sea un poco más alta."},
+  {k:["tarjeta de cr","credito tarjeta","pago minimo","mínimo"], q:"¿Cómo funciona una tarjeta de crédito?",
+   a:"Es dinero del banco que usas y <b>debes devolver</b>. ⚠️ Si pagas solo el <b>mínimo</b>, el resto genera muchos intereses y la deuda crece. Consejo: paga siempre el <b>total</b> antes de la fecha de pago y no gastes más de lo que podrás cubrir."},
+  {k:["ahorrar","cuanto ahorrar","cuánto deber"], q:"¿Cuánto debería ahorrar?",
+   a:"Una buena meta es la regla <b>50/30/20</b>: 50% necesidades, 30% deseos y <b>20% ahorro</b>. Si ganas S/ 1,500, intenta guardar ~S/ 300 al mes. Si es mucho, empieza con lo que puedas: ¡lo importante es la constancia! 🐷"},
+  {k:["fondo","emergencia"], q:"¿Qué es un fondo de emergencia?",
+   a:"Es un ahorro guardado <b>solo para imprevistos</b> (salud, reparaciones, quedarte sin ingresos). 🛟 Lo ideal es juntar de <b>3 a 6 meses</b> de tus gastos. Empieza pequeño: S/ 50 al mes ya es un gran comienzo."},
+  {k:["ahorrar e invertir","diferencia","invertir","inversion"], q:"¿Diferencia entre ahorrar e invertir?",
+   a:"<b>Ahorrar</b> es guardar tu dinero de forma segura. 🐷 <b>Invertir</b> es poner ese dinero a <b>crecer</b>, asumiendo cierto riesgo (puede subir o bajar). 📈 Regla de oro: primero ten tu fondo de emergencia y luego considera invertir."},
+  {k:["estafa","phishing","fraude","seguro"], q:"¿Cómo evito estafas?",
+   a:"3 reglas de oro 🛡️: 1) Ningún banco pide tu <b>clave</b> por llamada, SMS o WhatsApp. 2) Desconfía de la <b>urgencia</b> («ingresa YA»). 3) Verifica siempre por el <b>canal oficial</b> (la app o el número del banco). Ante la duda, no toques el enlace."},
+];
+ROUTES.finan=()=>{
+  showChrome(true); setNav("finan");
+  render(`<div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+      <div style="font-size:40px">🤖</div>
+      <div><h2>FINAN</h2><p class="small muted" style="font-weight:700">${t("finan_sub")}</p></div></div>
+    <div class="chat" id="chat"></div>
+    <div class="suggest" id="sugg"></div>
+    <p class="small muted center" style="font-weight:700;margin-top:14px;line-height:1.4">${t("finan_disclaimer")}</p>`);
+  const chat=$("#chat");
+  const push=(who,txt)=>{ const m=document.createElement("div"); m.className="msg "+who; m.innerHTML=txt; chat.appendChild(m); chat.scrollTop=1e6; };
+  push("bot",`¡${t("map_hello")}, ${S.name}! ${t("finan_hello")}`);
+  const sugg=$("#sugg");
+  FINAN_QA.forEach(item=>{ const b=document.createElement("button"); b.textContent=item.q;
+    b.onclick=()=>{ push("me",item.q); setTimeout(()=>push("bot",item.a),350); };
+    sugg.appendChild(b);
+  });
+};
+
+/* ================= PERFIL + SALUD FINANCIERA ================= */
+ROUTES.profile=()=>{
+  showChrome(true); setNav("profile");
+  const dimNames={
+    es:["Presupuesto","Ahorro","Fondo emergencia","Endeudamiento","Seguridad","Conocimiento","Metas"],
+    en:["Budget","Savings","Emergency fund","Debt","Security","Knowledge","Goals"],
+    qu:["Presupuesto","Waqaychay","Emergencia waqay","Manu","Amachay","Yachay","Munaykuna"],
+    ay:["Presupuesto","Imaña","Emergencia imaña","Manu","Jark'aqaña","Yatiña","Munañanaka"]
+  };
+  const dkeys=["presupuesto","ahorro","fondo","deuda","seguridad","conocimiento","metas"];
+  const names=dimNames[S.lang]||dimNames.es;
+  const dims=dkeys.map((k,i)=>[k,names[i]]);
+  const vals=dims.map(d=>Math.round(S.salud[d[0]]||0));
+  const score=Math.round(vals.reduce((a,b)=>a+b,0)/dims.length);
+  const done=LEVELS.filter(l=>S.levels[l.id]==="done").length;
+  // gauge
+  const R=64, C=2*Math.PI*R, off=C*(1-score/100);
+  render(`
+    <div class="center">
+      <div style="font-size:52px">🧑‍🎓</div>
+      <h2 style="margin-top:4px">${S.name}</h2>
+      <span class="tag verde">${t("prof_lvl")} ${S.nivelPerfil}</span>
+    </div>
+    <div class="spacer-m"></div>
+    <div class="kpi">
+      <div class="k"><b>${S.xp}</b><span>${t("prof_xp")}</span></div>
+      <div class="k"><b>${S.sol}</b><span>${t("prof_coins")}</span></div>
+      <div class="k"><b>${done}/${LEVELS.length}</b><span>${t("prof_levels")}</span></div>
+      <div class="k"><b>${S.badges.size}</b><span>${t("prof_badges")}</span></div>
+    </div>
+    <div class="spacer-m"></div>
+    <h3>${t("prof_health")}</h3>
+    <div class="card center" style="margin-top:10px">
+      <div class="gauge">
+        <svg width="150" height="150">
+          <circle cx="75" cy="75" r="${R}" fill="none" stroke="#E2E8F0" stroke-width="14"/>
+          <circle cx="75" cy="75" r="${R}" fill="none" stroke="${score>=70?'#10B981':score>=40?'#F59E0B':'#EF4444'}"
+            stroke-width="14" stroke-linecap="round"
+            stroke-dasharray="${C}" stroke-dashoffset="${off}" style="transition:stroke-dashoffset 1s"/>
+        </svg>
+        <div class="g-num"><div><b>${score}</b><div class="small muted" style="font-weight:800">${t("prof_of100")}</div></div></div>
+      </div>
+      <p style="font-weight:700;margin-top:6px">${score>=70?t("health_good"):score>=40?t("health_mid"):t("health_low")}</p>
+    </div>
+    <div class="spacer-m"></div>
+    <div class="card">
+      ${dims.map((d,k)=>`<div class="dim-row">
+        <span class="d-name">${d[1]}</span>
+        <div class="prog ${vals[k]>=70?'':vals[k]>=40?'sol':''}"><i style="width:${vals[k]}%;background:${vals[k]>=70?'var(--verde)':vals[k]>=40?'var(--sol)':'var(--coral)'}"></i></div>
+        <span class="d-val">${vals[k]}%</span></div>`).join("")}
+      <div style="background:var(--sol-soft);border-radius:12px;padding:12px;margin-top:6px">
+        <b style="color:var(--sol-dark)">${t("prof_opportunity")}</b>
+        <p style="font-weight:700;margin-top:4px;font-size:13.5px">${weakestAdvice(dims,vals)}</p>
+      </div>
+    </div>
+    <div class="spacer-m"></div>
+    <h3>${t("prof_mybadges")}</h3>
+    <div class="spacer-s"></div>
+    <div class="badge-grid">
+      ${BADGES.map(b=>`<div class="badge ${S.badges.has(b.id)?'got':''}">
+        <div class="b-ico">${b.ico}</div><div class="b-name">${b.n}</div></div>`).join("")}
+    </div>
+    <div class="spacer-m"></div>
+    <h3>${t("prof_lang")}</h3>
+    <div class="spacer-s"></div>
+    <div id="langpick" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    <div class="spacer-m"></div>
+    <button class="btn ghost" id="reset-btn">${t("prof_reset")}</button>
+    <div class="spacer-m"></div>`);
+  // selector de idioma
+  const lp=$("#langpick");
+  LANGS.forEach(l=>{
+    const b=document.createElement("button");
+    const on=(S.lang===l.code);
+    b.className="chip"+(on?" sel":""); b.style.fontSize="13px"; b.style.padding="10px 13px";
+    b.innerHTML=`${l.flag} ${l.native}`;
+    b.onclick=()=>{ setLang(l.code); go("profile"); };
+    lp.appendChild(b);
+  });
+  $("#reset-btn").onclick=()=>{ if(confirm(t("prof_reset")+" ?")) resetApp(); };
+};
+function weakestAdvice(dims,vals){
+  let min=101,idx=0; vals.forEach((v,k)=>{if(v<min){min=v;idx=k;}});
+  const tips={presupuesto:"Crea tu presupuesto en el Nivel 3 para saber a dónde va tu dinero.",
+    ahorro:"Empieza a ahorrar aunque sea poco: prueba el simulador de metas.",
+    fondo:"Arma tu fondo de emergencia: junta de a pocos, 3 a 6 meses de gastos.",
+    deuda:"Aprende a comparar créditos (Nivel 9) y cuida no pasar del 30% de tus ingresos en deudas.",
+    seguridad:"Practica el detector de estafas (Nivel 12) para proteger tu dinero.",
+    conocimiento:"Sigue completando niveles: cada uno suma a tu conocimiento.",
+    metas:"Define una meta concreta en el simulador de ahorro y ponle fecha."};
+  return "Tu punto más bajo es <b>"+dims[idx][1]+"</b>. "+tips[dims[idx][0]];
+}
+
+/* ================= NAV + INIT ================= */
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function updateStreak(){
+  const t=todayISO();
+  if(!S.lastDay){ S.lastDay=t; return; }
+  if(S.lastDay===t) return;                  // mismo día, sin cambios
+  const diff=(new Date(t)-new Date(S.lastDay))/86400000;
+  if(diff===1){ S.racha=(S.racha||0)+1; }    // día consecutivo
+  else if(diff>1){ S.racha=1; }              // se rompió la racha
+  S.lastDay=t; saveState();
+}
+
+/* Pantalla de graduación: Maestro de mis finanzas */
+ROUTES.maestro=()=>{
+  showChrome(true); setNav("map");
+  render(`<div class="center" style="padding-top:20px">
+      <div style="font-size:84px;animation:bob 2s ease-in-out infinite">🏆</div>
+      <div class="spacer-s"></div>
+      <span class="tag sol">🎉</span>
+      <h1 style="margin-top:10px">${t("maestro_lbl")}</h1>
+      <div class="spacer-s"></div>
+      <p class="muted" style="font-weight:700">${S.name} 🎉</p>
+      <div class="spacer-m"></div>
+      <div class="kpi">
+        <div class="k"><b>${S.xp}</b><span>${t("prof_xp")}</span></div>
+        <div class="k"><b>${S.badges.size}</b><span>${t("prof_badges")}</span></div>
+      </div>
+      <div class="spacer-m"></div>
+      <div class="spacer-m"></div>
+      <button class="btn" id="toMap">${t("b_back_map")}</button>
+    </div>`);
+  $("#toMap").onclick=()=>go("map");
+};
+
+function resetApp(){
+  clearState();
+  S.name="";S.nivelPerfil="Explorador";S.lang=null;S.xp=0;S.sol=0;S.racha=1;S.vidas=5;
+  S.levels={};S.badges=new Set();S.onboarded=false;S.lastDay=null;
+  Object.keys(S.salud).forEach(k=>S.salud[k]=0);
+  updateTop(); go("chooseLang");
+}
+document.querySelectorAll(".navbtn").forEach(b=>{
+  b.onclick=()=>go(b.dataset.nav);
+});
+
+/* Arranque: idioma → bienvenida → (o mapa si ya hay progreso) */
+function initApp(){
+  const resumed = loadState();
+  updateTop();
+  if(!S.lang){ go("chooseLang"); return; }   // primera vez: elegir idioma
+  if(resumed){
+    updateStreak(); updateTop();
+    const done=LEVELS.filter(l=>S.levels[l.id]==="done").length;
+    if(done===LEVELS.length){ go("maestro"); } else { go("map"); }
+  } else {
+    go("welcome");
+  }
+}
+initApp();
+</script>
+</body>
+</html>
