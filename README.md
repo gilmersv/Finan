@@ -67,7 +67,5 @@ Especialista en finanzas públicas y educación financiera
 
 ---
 
-## 📄 Licencia
-
-Proyecto educativo de código abierto.
-Sugerencia: agrega una licencia [MIT](https://choosealicense.com/licenses/mit/) para permitir su libre uso y adaptación.
+© 2026 Gilmer Sánchez VAlenzuela. Todos los derechos reservados.
+Prohibido reproducir, modificar o distribuir sin autorización.
