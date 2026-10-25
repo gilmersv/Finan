@@ -61,7 +61,7 @@ en las tiendas móviles (Google Play y App Store).
 ## 👤 Autor
 
 **Gilmer Sánchez Valenzuela**
-Candidato a Doctor en Economía (Universidad Complutense de Madrid) ·
+PhD (c) en Economía (Universidad Complutense de Madrid) ·
 Especialista en finanzas públicas y educación financiera
 📧 gilmersv@gmail.com
 
